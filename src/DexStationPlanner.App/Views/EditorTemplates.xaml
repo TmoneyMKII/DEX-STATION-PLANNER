@@ -260,6 +260,98 @@
         </StackPanel>
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type vm:FeatureEditor}">
+        <StackPanel>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Name" />
+                <TextBox Grid.Column="1" Text="{Binding Feature.Name}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}" Visibility="{Binding HasSurface, Converter={StaticResource BoolToVisibility}}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Surface" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Surfaces}" SelectedItem="{Binding Feature.Surface}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}" Visibility="{Binding IsPort, Converter={StaticResource BoolToVisibility}}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Type" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding PortKinds}" SelectedItem="{Binding Feature.PortKind}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}" Visibility="{Binding HasPosition, Converter={StaticResource BoolToVisibility}}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Center X/Y" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Margin="0,0,4,0" Text="{Binding X, StringFormat=0.#}" />
+                <TextBox Grid.Column="2" Text="{Binding Y, StringFormat=0.#}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}" Visibility="{Binding HasLength, Converter={StaticResource BoolToVisibility}}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="{Binding LengthLabel, Mode=OneWay}" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding Length, StringFormat=0.#}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}" Visibility="{Binding HasWidth, Converter={StaticResource BoolToVisibility}}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Width" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding Width, StringFormat=0.#}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}" Visibility="{Binding HasRotation, Converter={StaticResource BoolToVisibility}}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Rotation (°)" ToolTip="Counterclockwise from site-grid east, like modules" />
+                <TextBox Grid.Column="1" Text="{Binding Rotation, StringFormat=0.#}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}" Visibility="{Binding IsPort, Converter={StaticResource BoolToVisibility}}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Water depth" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding WaterDepth, StringFormat=0.#}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}" Visibility="{Binding IsFuelFarm, Converter={StaticResource BoolToVisibility}}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Capacity" /> (<Run Text="{Binding CapacityUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding Capacity, StringFormat=N0}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}" Visibility="{Binding IsRunway, Converter={StaticResource BoolToVisibility}}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Designation" ToolTip="Runway numbers from the true bearing (not magnetic)" />
+                <TextBlock Grid.Column="1" Style="{StaticResource Dex.Value}" Text="{Binding Designation}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}" Visibility="{Binding IsRoad, Converter={StaticResource BoolToVisibility}}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Length" />
+                <TextBlock Grid.Column="1" Style="{StaticResource Dex.Value}" Text="{Binding RoadLength}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="From camp origin" />
+                <TextBlock Grid.Column="1" Style="{StaticResource Dex.Value}" Text="{Binding DistanceFromCamp}" />
+            </Grid>
+            <TextBlock Style="{StaticResource Dex.Label}" Text="Notes" Margin="0,4,0,4" />
+            <TextBox Text="{Binding Feature.Notes}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="40" />
+
+            <StackPanel Visibility="{Binding HasAccess, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Style="{StaticResource Dex.SectionHeader}" Text="Who can use it" />
+                <ItemsControl ItemsSource="{Binding Access}" Focusable="False">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:AccessRow}">
+                            <DockPanel Margin="0,3">
+                                <TextBlock x:Name="Mark" DockPanel.Dock="Left" Width="18" FontFamily="{StaticResource Dex.IconFont}"
+                                           Text="&#xE73E;" Foreground="{DynamicResource Dex.Good}" Margin="0,2,0,0" />
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Vehicle}" />
+                                    <TextBlock Text="{Binding Reason}" Style="{StaticResource Dex.Muted}" FontSize="11" />
+                                </StackPanel>
+                            </DockPanel>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Ok}" Value="False">
+                                    <Setter TargetName="Mark" Property="Text" Value="&#xE711;" />
+                                    <Setter TargetName="Mark" Property="Foreground" Value="{DynamicResource Dex.Warning}" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type vm:UtilityRunEditor}">
         <StackPanel>
             <Grid Style="{StaticResource Dex.FieldGrid}">

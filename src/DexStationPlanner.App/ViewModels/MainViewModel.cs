@@ -14,7 +14,7 @@ using DexStationPlanner.Core.Stations;
 
 namespace DexStationPlanner.App.ViewModels;
 
-public enum AppPage { Project, Modules, Stations, Globe, Settings }
+public enum AppPage { Project, Modules, Stations, Globe, Logistics, Settings }
 
 /// <summary>
 /// Owns the open project, file commands, dirty state and the project-wide undo history.
@@ -46,6 +46,7 @@ public sealed partial class MainViewModel : ObservableObject
 
         Modules = new ModulesViewModel(this);
         Stations = new StationsViewModel(this);
+        Logistics = new LogisticsViewModel(this);
         RecentFiles = new ObservableCollection<string>(settings.RecentFiles.Where(File.Exists));
         AttachProject(resetHistory: true);
     }
@@ -53,6 +54,7 @@ public sealed partial class MainViewModel : ObservableObject
     public AppSettings Settings { get; }
     public ModulesViewModel Modules { get; }
     public StationsViewModel Stations { get; }
+    public LogisticsViewModel Logistics { get; }
     public ObservableCollection<string> RecentFiles { get; }
 
     public StationProject Project { get; private set; } = ExampleProject.CreateBlank();

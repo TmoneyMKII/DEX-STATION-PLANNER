@@ -1,0 +1,98 @@
+<UserControl x:Class="DexStationPlanner.App.Views.LogisticsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:DexStationPlanner.App.ViewModels"
+             xmlns:logistics="clr-namespace:DexStationPlanner.Core.Logistics;assembly=DexStationPlanner.Core"
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance vm:LogisticsViewModel}"
+             d:DesignWidth="1300" d:DesignHeight="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="280" />
+            <ColumnDefinition Width="340" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Catalog -->
+        <Border Style="{StaticResource Dex.Panel}" BorderThickness="0,0,1,0">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="Transport catalog" FontWeight="SemiBold" Margin="12,10,8,2" />
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource Dex.Muted}" FontSize="11" Margin="12,0,12,6"
+                           Text="Representative planning figures. Confirm real capability with the operator." />
+                <ListBox ItemsSource="{Binding VehicleView}" SelectedItem="{Binding SelectedVehicle}" BorderThickness="0" Background="Transparent"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" Margin="4,0">
+                    <ListBox.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name, Converter={StaticResource Humanize}}" Style="{StaticResource Dex.SectionHeader}" Margin="8,8,0,2" />
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ListBox.GroupStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type logistics:VehicleDefinition}">
+                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <!-- Vehicle details -->
+        <Border Grid.Column="1" Style="{StaticResource Dex.Panel}" BorderThickness="0,0,1,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="16,12" DataContext="{Binding}">
+                    <TextBlock Text="{Binding SelectedVehicle.Name}" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding SelectedVehicle.Description}" Style="{StaticResource Dex.Muted}" Margin="0,6,0,10" />
+                    <ContentControl Content="{Binding Specs}" ContentTemplate="{StaticResource Dex.StatsList}" Focusable="False" />
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Station access -->
+        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20,12,20,20">
+                <DockPanel>
+                    <ComboBox DockPanel.Dock="Right" MinWidth="200" ItemsSource="{Binding Stations.StationList}"
+                              SelectedItem="{Binding Stations.SelectedStation}" DisplayMemberPath="Name" />
+                    <TextBlock Text="{Binding AccessTitle}" FontSize="17" FontWeight="SemiBold" VerticalAlignment="Center" />
+                </DockPanel>
+                <TextBlock Style="{StaticResource Dex.Muted}" Margin="0,6,0,12"
+                           Text="Checked against the station's runways, helipads, ports and roads, and its elevation. Add infrastructure on the Stations page or the globe." />
+                <ItemsControl ItemsSource="{Binding Access}" Focusable="False">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:StationAccessRow}">
+                            <Border BorderBrush="{DynamicResource Dex.Border}" BorderThickness="0,0,0,1" Padding="0,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="26" />
+                                        <ColumnDefinition Width="260" />
+                                        <ColumnDefinition Width="160" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="Mark" FontFamily="{StaticResource Dex.IconFont}" Text="&#xE73E;" Foreground="{DynamicResource Dex.Good}" VerticalAlignment="Top" Margin="0,2,0,0" />
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="{Binding Vehicle}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Mode, Converter={StaticResource Humanize}}" FontSize="11" Foreground="{DynamicResource Dex.TextMuted}" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="2" Text="{Binding Via}" TextTrimming="CharacterEllipsis" Margin="0,0,8,0" />
+                                    <TextBlock Grid.Column="3" Text="{Binding Reason}" TextWrapping="Wrap" Foreground="{DynamicResource Dex.TextMuted}" />
+                                </Grid>
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Ok}" Value="False">
+                                    <Setter TargetName="Mark" Property="Text" Value="&#xE711;" />
+                                    <Setter TargetName="Mark" Property="Foreground" Value="{DynamicResource Dex.Warning}" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Style="{StaticResource Dex.Muted}" Margin="0,12,0,0"
+                           Text="No station selected." Visibility="{Binding Stations.SelectedStation, Converter={StaticResource NullToVisibility}, ConverterParameter=invert}" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -26,6 +26,7 @@
         <KeyBinding Key="D2" Modifiers="Ctrl" Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Modules}" />
         <KeyBinding Key="D3" Modifiers="Ctrl" Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Stations}" />
         <KeyBinding Key="D4" Modifiers="Ctrl" Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Globe}" />
+        <KeyBinding Key="D5" Modifiers="Ctrl" Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Logistics}" />
     </Window.InputBindings>
 
     <Grid>
@@ -130,6 +131,13 @@
                             <TextBlock Text="Globe" FontSize="11" Margin="0,4,0,0" HorizontalAlignment="Center" />
                         </StackPanel>
                     </RadioButton>
+                    <RadioButton Style="{StaticResource Dex.NavItem}" GroupName="Nav" ToolTip="Transport catalog and station access (Ctrl+5)"
+                                 IsChecked="{Binding CurrentPage, Converter={StaticResource EnumEquals}, ConverterParameter=Logistics}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource Dex.Icon}" Text="&#xE709;" FontSize="20" HorizontalAlignment="Center" />
+                            <TextBlock Text="Logistics" FontSize="11" Margin="0,4,0,0" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </RadioButton>
                 </StackPanel>
                 <RadioButton DockPanel.Dock="Bottom" VerticalAlignment="Bottom" Margin="0,0,0,8" Style="{StaticResource Dex.NavItem}" GroupName="Nav" ToolTip="Settings"
                              IsChecked="{Binding CurrentPage, Converter={StaticResource EnumEquals}, ConverterParameter=Settings}">
@@ -147,6 +155,7 @@
             <views:ModulesPage DataContext="{Binding Modules}" Visibility="{Binding DataContext.CurrentPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource EnumToVisibility}, ConverterParameter=Modules}" />
             <views:StationsPage DataContext="{Binding Stations}" Visibility="{Binding DataContext.CurrentPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource EnumToVisibility}, ConverterParameter=Stations}" />
             <views:GlobePage x:Name="GlobePage" Visibility="{Binding CurrentPage, Converter={StaticResource EnumToVisibility}, ConverterParameter=Globe}" />
+            <views:LogisticsPage DataContext="{Binding Logistics}" Visibility="{Binding DataContext.CurrentPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource EnumToVisibility}, ConverterParameter=Logistics}" />
             <views:SettingsPage Visibility="{Binding CurrentPage, Converter={StaticResource EnumToVisibility}, ConverterParameter=Settings}" />
         </Grid>
 

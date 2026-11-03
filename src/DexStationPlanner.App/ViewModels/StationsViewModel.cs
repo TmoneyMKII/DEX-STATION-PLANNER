@@ -4,7 +4,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DexStationPlanner.App.Editors;
 using DexStationPlanner.App.Services;
+using DexStationPlanner.Core.Geometry;
 using DexStationPlanner.Core.Globe;
+using DexStationPlanner.Core.Logistics;
 using DexStationPlanner.Core.Model;
 using DexStationPlanner.Core.Serialization;
 using DexStationPlanner.Core.Stations;
@@ -65,6 +67,12 @@ public sealed partial class StationsViewModel : ObservableObject
 
     public SiteTool Tool { get; set => SetProperty(ref field, value); }
     public UtilityKind UtilityKind { get; set => SetProperty(ref field, value); }
+
+    /// <summary>Kind placed by the Feature tool (site plan) and by globe placement.</summary>
+    public SiteFeatureKind FeatureKind { get; set => SetProperty(ref field, value); }
+
+    public IReadOnlyList<SiteFeatureKind> FeatureKinds { get; } = Enum.GetValues<SiteFeatureKind>();
+    public VehicleLookup Vehicles => VehicleLookup.ForProject(Project);
     public bool SnapEnabled { get; set => SetProperty(ref field, value); } = true;
 
     public object? Selection
@@ -79,6 +87,7 @@ public sealed partial class StationsViewModel : ObservableObject
                 ModuleInstance i => new InstanceEditor(i, Project.FindModule(i.DefinitionId)),
                 ConnectorLink l when SelectedStation is { } s => new LinkEditor(l, s, Project.FindModule),
                 UtilityRun r when SelectedStation is { } s => new UtilityRunEditor(r, s),
+                SiteFeature f when SelectedStation is { } s => new FeatureEditor(f, s, Vehicles),
                 _ => null,
             };
             OnPropertyChanged(nameof(SelectedEditor));
@@ -137,6 +146,21 @@ public sealed partial class StationsViewModel : ObservableObject
         };
         foreach (var (kind, len) in s.UtilityLengthM.Where(kv => kv.Value > 0))
             rows.Add(new($"{kind} lines", UnitFormatter.Length(len, u, 1)));
+
+        // How the station can be reached, summarized by transport mode (details on the Logistics page).
+        var access = Compatibility.StationAccess(station, Vehicles.All(), u);
+        foreach (var group in access.GroupBy(a => a.Vehicle.Mode))
+        {
+            var ok = group.Count(a => a.Ok);
+            var label = group.Key switch
+            {
+                TransportMode.FixedWing => "Aircraft access",
+                TransportMode.Rotorcraft => "Helicopter access",
+                TransportMode.Ship => "Ship access",
+                _ => "Overland access",
+            };
+            rows.Add(new(label, $"{ok} of {group.Count()}", ok == 0 ? "warn" : "good"));
+        }
         if (!station.Site.IsPlaced) rows.Insert(0, new("Location", "Not placed on the globe yet", "warn"));
         Stats = rows;
         OnPropertyChanged(nameof(Stats));
@@ -206,6 +230,40 @@ public sealed partial class StationsViewModel : ObservableObject
         s.Site.IsPlaced = true;
         _main.CheckpointNow();
     }
+
+    /// <summary>
+    /// Adds a feature from points clicked on the globe. Runways and piers take their two ends, roads the whole
+    /// path, everything else the first point. Returns false if the station has no location yet.
+    /// </summary>
+    public bool AddFeatureFromGlobe(SiteFeatureKind kind, IReadOnlyList<GeoPoint> points)
+    {
+        if (SelectedStation is not { Site.IsPlaced: true } s || points.Count == 0) return false;
+        var origin = new GeoPoint(s.Site.Latitude, s.Site.Longitude);
+        var grid = points
+            .Select(p => Geodesy.EnuToGrid(Geodesy.ToLocal(origin, p), s.Site.GridHeadingDegrees))
+            .Select(p => new Vec2(Math.Round(p.X, 2), Math.Round(p.Y, 2)))
+            .ToList();
+
+        var f = SiteFeatureDefaults.Create(kind, s.Environment, grid[0]);
+        if (kind == SiteFeatureKind.Road)
+        {
+            if (grid.Count < 2) return false;
+            foreach (var p in grid) f.Path.Add(p);
+        }
+        else if (SiteFeatureDefaults.IsTwoPoint(kind))
+        {
+            if (grid.Count < 2) return false;
+            SiteFeatureDefaults.SetEnds(f, grid[0], grid[1]);
+        }
+        s.Features.Add(f);
+        Selection = f;
+        _main.CheckpointNow();
+        return true;
+    }
+
+    /// <summary>How many clicks the globe should collect for a kind: 2 for runways/piers, 0 (until finished) for roads, else 1.</summary>
+    public static int GlobePointsFor(SiteFeatureKind kind) =>
+        kind == SiteFeatureKind.Road ? 0 : SiteFeatureDefaults.IsTwoPoint(kind) ? 2 : 1;
 
     private bool HasStation() => SelectedStation is not null;
 

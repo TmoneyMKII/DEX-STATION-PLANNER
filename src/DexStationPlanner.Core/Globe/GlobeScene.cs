@@ -21,10 +21,14 @@ public sealed record GlobeScene(
     IReadOnlyList<GlobeVolume> Volumes,
     IReadOnlyList<GlobeLine> Lines);
 
-/// <summary>An extruded footprint: a module, a stilt pad or a corridor.</summary>
+/// <summary>
+/// An extruded footprint (module, corridor) or, when <see cref="Top"/> equals <see cref="Bottom"/>,
+/// a flat shape draped on the ground (runway, helipad, yard, fuel farm). Kind is "module", "corridor" or a site feature kind.
+/// </summary>
 public sealed record GlobeVolume(string Id, string Label, string Kind, string Color, double[][] Ring, double Bottom, double Top);
 
-public sealed record GlobeLine(string Id, string Label, string Kind, string Color, double[][] Points);
+/// <summary>A line on the ground. <see cref="WidthM"/> &gt; 0 draws a corridor of that real width (roads); 0 draws a thin line.</summary>
+public sealed record GlobeLine(string Id, string Label, string Kind, string Color, double[][] Points, double WidthM = 0);
 
 public static class GlobeSceneBuilder
 {
@@ -43,11 +47,9 @@ public static class GlobeSceneBuilder
     public static GlobeScene Build(Station station, StationProject project)
     {
         Func<Guid, ModuleDefinition?> resolve = project.FindModule;
-        var heading = station.Site.GridHeadingDegrees * Math.PI / 180;
         double[] ToEnu(Vec2 grid)
         {
-            // Grid north is rotated clockwise from true north by the heading.
-            var p = grid.Rotate(-heading);
+            var p = Geodesy.GridToEnu(grid, station.Site.GridHeadingDegrees);
             return [Math.Round(p.X, 3), Math.Round(p.Y, 3)];
         }
 
@@ -83,10 +85,41 @@ public static class GlobeSceneBuilder
                 route.Select(ToEnu).ToArray()));
         }
 
+        foreach (var f in station.Features)
+        {
+            var label = string.IsNullOrWhiteSpace(f.Name) ? f.Kind.ToString() : f.Name;
+            if (f.Kind == SiteFeatureKind.Road)
+            {
+                if (f.Path.Count >= 2)
+                    lines.Add(new GlobeLine(f.Id.ToString(), label, "Road", FeatureColor(f), f.Path.Select(ToEnu).ToArray(), Math.Max(1, f.Width)));
+                continue;
+            }
+            // All area infrastructure is draped flat on the ground (a fuel farm is a bermed area, not one big block).
+            volumes.Add(new GlobeVolume(f.Id.ToString(), label, f.Kind.ToString(), FeatureColor(f),
+                FeatureGeometry.Outline(f)!.Select(ToEnu).ToArray(), 0, 0));
+        }
+
         var site = station.Site;
         return new GlobeScene(station.Id, station.Name, site.IsPlaced, site.Latitude, site.Longitude,
             site.GroundElevation, volumes, lines);
     }
+
+    /// <summary>Display color for a feature, by kind and surface. Shared by the site plan and the globe.</summary>
+    public static string FeatureColor(SiteFeature f) => f.Kind switch
+    {
+        SiteFeatureKind.Runway or SiteFeatureKind.Road or SiteFeatureKind.Helipad => f.Surface switch
+        {
+            SurfaceType.Paved => "#4A4F57",
+            SurfaceType.Gravel => "#9C8B70",
+            SurfaceType.Snow => "#E6EEF5",
+            SurfaceType.BlueIce => "#8FC3E8",
+            _ => "#3A7CC0",
+        },
+        SiteFeatureKind.Port => "#2F6FA8",
+        SiteFeatureKind.FuelFarm => "#E0663A",
+        SiteFeatureKind.CargoYard => "#B08A3E",
+        _ => "#3FBF7F",
+    };
 
     private static double FloorTop(ModuleInstance inst, Func<Guid, ModuleDefinition?> resolve)
     {

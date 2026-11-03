@@ -33,11 +33,13 @@ public sealed class SitePlanCanvas : PlanCanvasBase
     private Guid? _dragOverModule;
     private WaypointDrag? _waypointDrag;
     private Guid? _lastStationId;
+    private readonly List<Vec2> _featurePoints = [];
+    private FeatureDrag? _featureDrag;
 
     public SitePlanCanvas()
     {
         AllowDrop = true;
-        MinScale = 0.2;
+        MinScale = 0.02; // ~50 m per pixel: room for airfields kilometers from camp
         MaxScale = 200;
         MajorStep = 10;
         GridStep = 0.5;
@@ -98,6 +100,17 @@ public sealed class SitePlanCanvas : PlanCanvasBase
         set => SetValue(UtilityKindProperty, value);
     }
 
+    public static readonly DependencyProperty FeatureKindProperty = DependencyProperty.Register(
+        nameof(FeatureKind), typeof(SiteFeatureKind), typeof(SitePlanCanvas),
+        new PropertyMetadata(SiteFeatureKind.Runway, (d, _) => ((SitePlanCanvas)d).CancelPending()));
+
+    /// <summary>Kind of infrastructure placed by the Feature tool.</summary>
+    public SiteFeatureKind FeatureKind
+    {
+        get => (SiteFeatureKind)GetValue(FeatureKindProperty);
+        set => SetValue(FeatureKindProperty, value);
+    }
+
     public static readonly DependencyProperty UnitsProperty = DependencyProperty.Register(
         nameof(Units), typeof(UnitSystem), typeof(SitePlanCanvas),
         new FrameworkPropertyMetadata(UnitSystem.Metric, FrameworkPropertyMetadataOptions.AffectsRender));
@@ -148,6 +161,7 @@ public sealed class SitePlanCanvas : PlanCanvasBase
         var pts = new List<Vec2>();
         foreach (var inst in s.Modules)
             if (Resolve(inst.DefinitionId) is { } def) pts.AddRange(SiteLayout.WorldFootprint(inst, def));
+        foreach (var f in s.Features) pts.AddRange(FeatureGeometry.Points(f));
         if (pts.Count == 0) return (new Vec2(-25, -25), new Vec2(25, 25));
         var (min, max) = Polygon.Bounds(pts);
         return (min - new Vec2(5, 5), max + new Vec2(5, 5));
@@ -158,6 +172,7 @@ public sealed class SitePlanCanvas : PlanCanvasBase
         _linkStart = null;
         _runStart = null;
         _runWaypoints.Clear();
+        _featurePoints.Clear();
         InvalidateVisual();
     }
 
@@ -183,12 +198,80 @@ public sealed class SitePlanCanvas : PlanCanvasBase
         var catalog = Catalog;
         var used = SiteLayout.UsedConnectors(s);
 
+        // Infrastructure sits under everything else: roads first, then areas.
+        foreach (var f in s.Features.OrderBy(f => f.Kind == SiteFeatureKind.Road ? 0 : 1))
+            DrawFeature(dc, s, f, ReferenceEquals(Selection, f));
+
         foreach (var link in s.Links) DrawLink(dc, s, link, ReferenceEquals(Selection, link));
         foreach (var inst in s.Modules) DrawModule(dc, inst, catalog, ReferenceEquals(Selection, inst), used);
         foreach (var run in s.UtilityRuns) DrawRun(dc, s, run, ReferenceEquals(Selection, run));
 
         DrawPending(dc, s);
         DrawNorthArrow(dc, s);
+    }
+
+    private void DrawFeature(DrawingContext dc, Station s, SiteFeature f, bool selected)
+    {
+        var color = GlobeSceneBuilder.FeatureColor(f);
+        var outlinePen = new Pen(selected ? ThemeBrush("Dex.Canvas.Selection") : BrushFromHex(color), selected ? 2.5 : 1.2);
+        outlinePen.Freeze();
+        var textBrush = ThemeBrush("Dex.Canvas.Text");
+        var halo = ThemeBrush("Dex.Surface");
+        var name = string.IsNullOrWhiteSpace(f.Name) ? f.Kind.ToString() : f.Name;
+
+        if (f.Kind == SiteFeatureKind.Road)
+        {
+            if (f.Path.Count < 2) return;
+            var geometry = PolylineGeometry(f.Path, false);
+            if (selected)
+            {
+                var glow = new Pen(ThemeBrush("Dex.Canvas.Selection"), Math.Max(2, f.Width * Scale) + 4) { LineJoin = PenLineJoin.Round };
+                glow.Freeze();
+                dc.DrawGeometry(null, glow, geometry);
+            }
+            var road = new Pen(BrushFromHex(color, 220), Math.Max(2, f.Width * Scale)) { LineJoin = PenLineJoin.Round, StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
+            road.Freeze();
+            dc.DrawGeometry(null, road, geometry);
+            if (selected)
+                foreach (var p in f.Path) dc.DrawEllipse(ThemeBrush("Dex.Canvas.Handle"), ThemePen("Dex.Canvas.Selection", 1.5), ToScreen(p), 5, 5);
+            var mid = f.Path[f.Path.Count / 2 - (f.Path.Count % 2 == 0 ? 1 : 0)];
+            var next = f.Path[Math.Min(f.Path.Count - 1, f.Path.IndexOf(mid) + 1)];
+            DrawText(dc, name, ToScreen(Vec2.Lerp(mid, next, 0.5)) + new Vector(0, -12), textBrush, 10, halo: halo);
+            return;
+        }
+
+        var outline = FeatureGeometry.Outline(f)!;
+        dc.DrawGeometry(BrushFromHex(color, f.Kind == SiteFeatureKind.ScienceSite ? (byte)40 : (byte)200), outlinePen, PolylineGeometry(outline, true, true));
+        var center = ToScreen(f.Position);
+        var label = name;
+
+        switch (f.Kind)
+        {
+            case SiteFeatureKind.Runway:
+            {
+                var (a, b) = FeatureGeometry.Ends(f);
+                var marking = new Pen(f.Surface == SurfaceType.Snow ? Brushes.SteelBlue : Brushes.White, Math.Clamp(Scale, 1, 3)) { DashStyle = DashStyles.Dash };
+                marking.Freeze();
+                dc.DrawLine(marking, ToScreen(a), ToScreen(b));
+                label = $"{name} {FeatureGeometry.RunwayDesignation(f, s.Site.GridHeadingDegrees)} · {UnitFormatter.Length(f.Length, Units, 0)}";
+                break;
+            }
+            case SiteFeatureKind.Helipad:
+            {
+                var r = f.Length / 2 * Scale;
+                if (r > 6) DrawText(dc, "H", center, Brushes.White, Math.Clamp(r, 8, 28), bold: true);
+                if (r > 12) center += new Vector(0, r + 10);
+                break;
+            }
+            case SiteFeatureKind.ScienceSite:
+            {
+                var dash = new Pen(BrushFromHex(color), 1.5) { DashStyle = DashStyles.Dash };
+                dash.Freeze();
+                dc.DrawGeometry(null, dash, PolylineGeometry(outline, true));
+                break;
+            }
+        }
+        DrawText(dc, label, center, textBrush, 10, halo: halo);
     }
 
     private void DrawModule(DrawingContext dc, ModuleInstance inst, EquipmentLookup catalog, bool selected, HashSet<(Guid, Guid)> used)
@@ -305,6 +388,25 @@ public sealed class SitePlanCanvas : PlanCanvasBase
             pen.Freeze();
             dc.DrawGeometry(null, pen, PolylineGeometry(pts, false));
         }
+        if (Tool == SiteTool.Feature && _hoverValid)
+        {
+            var hover = Snap(_hover);
+            if (FeatureKind == SiteFeatureKind.Road || SiteFeatureDefaults.IsTwoPoint(FeatureKind))
+            {
+                if (_featurePoints.Count > 0)
+                {
+                    dc.DrawGeometry(null, ThemePen("Dex.Canvas.Preview", 2, DashStyles.Dash), PolylineGeometry(_featurePoints.Append(hover).ToList(), false));
+                    DrawText(dc, UnitFormatter.Dimension(Vec2.Distance(_featurePoints[^1], hover), Units),
+                        ToScreen(Vec2.Lerp(_featurePoints[^1], hover, 0.5)) + new Vector(0, -14), ThemeBrush("Dex.Canvas.Text"), 11, halo: ThemeBrush("Dex.Surface"));
+                }
+                foreach (var p in _featurePoints) dc.DrawEllipse(ThemeBrush("Dex.Canvas.Preview"), null, ToScreen(p), 4, 4);
+            }
+            else
+            {
+                var ghost = SiteFeatureDefaults.Create(FeatureKind, s.Environment, hover);
+                dc.DrawGeometry(null, preview, PolylineGeometry(FeatureGeometry.Outline(ghost)!, true));
+            }
+        }
         if (_dragOverModule is { } id && Resolve(id) is { } def && ModuleGeometry.HasClosedShell(def))
         {
             var ghost = new ModuleInstance { DefinitionId = id, Position = Snap(_hover) };
@@ -394,7 +496,14 @@ public sealed class SitePlanCanvas : PlanCanvasBase
             if (SiteLayout.GetLinkGeometry(s, Resolve, link) is not { } g) continue;
             if (g.Corridor is { } c ? Polygon.Contains(c, w) : Vec2.Distance(g.A, w) * Scale < 9) return link;
         }
-        return HitModule(s, w);
+        if (HitModule(s, w) is { } module) return module;
+
+        // Infrastructure is underneath, so it's hit last; smaller features win over larger ones they sit on.
+        return s.Features
+            .Where(f => FeatureGeometry.DistanceTo(f, w) * Scale < 6)
+            .OrderBy(f => f.Kind == SiteFeatureKind.Road ? 0 : 1)
+            .ThenBy(f => f.Length * Math.Max(f.Width, f.Length))
+            .FirstOrDefault();
     }
 
     #endregion
@@ -412,6 +521,15 @@ public sealed class SitePlanCanvas : PlanCanvasBase
 
     private sealed record WaypointDrag(UtilityRun Run, int Index);
 
+    /// <summary>Moves a whole feature, or one road point when <see cref="PathIndex"/> is set.</summary>
+    private sealed class FeatureDrag(SiteFeature feature, Vec2 start, int? pathIndex)
+    {
+        public SiteFeature Feature { get; } = feature;
+        public Vec2 Last { get; set; } = start;
+        public int? PathIndex { get; } = pathIndex;
+        public bool Moved { get; set; }
+    }
+
     protected override void OnMouseDown(MouseButtonEventArgs e)
     {
         base.OnMouseDown(e);
@@ -424,7 +542,7 @@ public sealed class SitePlanCanvas : PlanCanvasBase
 
         if (e.ChangedButton == MouseButton.Right)
         {
-            if (_linkStart is not null || _runStart is not null) CancelPending();
+            if (HasPending) CancelPending();
             else if (Tool != SiteTool.Select) Tool = SiteTool.Select;
             e.Handled = true;
             return;
@@ -444,11 +562,26 @@ public sealed class SitePlanCanvas : PlanCanvasBase
                         break;
                     }
                 }
+                if (Selection is SiteFeature { Kind: SiteFeatureKind.Road } selectedRoad)
+                {
+                    var idx = selectedRoad.Path.ToList().FindIndex(p => Vec2.Distance(p, w) * Scale < 8);
+                    if (idx >= 0)
+                    {
+                        _featureDrag = new FeatureDrag(selectedRoad, w, idx);
+                        CaptureMouse();
+                        break;
+                    }
+                }
                 var hit = HitTest(s, w);
                 Selection = hit;
                 if (hit is ModuleInstance inst)
                 {
                     _drag = new ModuleDrag(inst, w, inst.Pose);
+                    CaptureMouse();
+                }
+                else if (hit is SiteFeature feature)
+                {
+                    _featureDrag = new FeatureDrag(feature, w, null);
                     CaptureMouse();
                 }
                 else if (hit is null)
@@ -464,9 +597,52 @@ public sealed class SitePlanCanvas : PlanCanvasBase
             case SiteTool.Utility:
                 UtilityClick(s, w);
                 break;
+
+            case SiteTool.Feature:
+                FeatureClick(s, Snap(w), e.ClickCount);
+                break;
         }
         InvalidateVisual();
         e.Handled = true;
+    }
+
+    private void FeatureClick(Station s, Vec2 p, int clickCount)
+    {
+        var kind = FeatureKind;
+        if (kind == SiteFeatureKind.Road)
+        {
+            // Double-click (or Enter) finishes the road.
+            if (clickCount == 2 && _featurePoints.Count >= 2) { CommitRoad(s); return; }
+            if (_featurePoints.Count == 0 || Vec2.Distance(_featurePoints[^1], p) > 1e-6) _featurePoints.Add(p);
+            return;
+        }
+        if (SiteFeatureDefaults.IsTwoPoint(kind))
+        {
+            if (_featurePoints.Count == 0) { _featurePoints.Add(p); return; }
+            if (Vec2.Distance(_featurePoints[0], p) < 1) return;
+            var f = SiteFeatureDefaults.Create(kind, s.Environment, p);
+            SiteFeatureDefaults.SetEnds(f, _featurePoints[0], p);
+            AddFeature(s, f);
+            return;
+        }
+        AddFeature(s, SiteFeatureDefaults.Create(kind, s.Environment, p));
+    }
+
+    private void CommitRoad(Station s)
+    {
+        if (_featurePoints.Count < 2) return;
+        var road = SiteFeatureDefaults.Create(SiteFeatureKind.Road, s.Environment, _featurePoints[0]);
+        foreach (var p in _featurePoints) road.Path.Add(p);
+        AddFeature(s, road);
+    }
+
+    private void AddFeature(Station s, SiteFeature f)
+    {
+        _featurePoints.Clear();
+        s.Features.Add(f);
+        Tool = SiteTool.Select;
+        Selection = f;
+        Complete();
     }
 
     private void LinkClick(Station s, Vec2 w)
@@ -527,6 +703,24 @@ public sealed class SitePlanCanvas : PlanCanvasBase
         {
             wd.Run.Waypoints[wd.Index] = Snap(w);
         }
+        else if (_featureDrag is { } fd && e.LeftButton == MouseButtonState.Pressed)
+        {
+            if (fd.PathIndex is { } i)
+            {
+                fd.Feature.Path[i] = Snap(w);
+            }
+            else
+            {
+                // Move by snapped steps so features stay on the grid they were placed on.
+                var step = Snap(w) - Snap(fd.Last);
+                if (step.LengthSquared > 0)
+                {
+                    FeatureGeometry.Translate(fd.Feature, step);
+                    fd.Last = w;
+                }
+            }
+            fd.Moved = true;
+        }
         else if (_drag is { } d && e.LeftButton == MouseButtonState.Pressed)
         {
             var proposed = new Pose2(Snap(d.Original.Position + (w - d.Start)), d.Original.RotationDegrees);
@@ -542,6 +736,7 @@ public sealed class SitePlanCanvas : PlanCanvasBase
         {
             SiteTool.Link => HitConnector(s, w) is null ? Cursors.Cross : Cursors.Hand,
             SiteTool.Utility => HitModule(s, w) is null ? Cursors.Cross : Cursors.Hand,
+            SiteTool.Feature => Cursors.Cross,
             _ => _drag is not null ? Cursors.SizeAll : HitTest(s, w) is null ? Cursors.Arrow : Cursors.SizeAll,
         };
         InvalidateVisual();
@@ -555,6 +750,12 @@ public sealed class SitePlanCanvas : PlanCanvasBase
             _waypointDrag = null;
             ReleaseMouseCapture();
             Complete();
+        }
+        if (_featureDrag is { } fd)
+        {
+            _featureDrag = null;
+            ReleaseMouseCapture();
+            if (fd.Moved) Complete();
         }
         if (_drag is { } d && Station is { } s)
         {
@@ -592,13 +793,22 @@ public sealed class SitePlanCanvas : PlanCanvasBase
         switch (e.Key)
         {
             case Key.Escape:
-                if (_linkStart is not null || _runStart is not null) CancelPending();
+                if (HasPending) CancelPending();
                 else if (Tool != SiteTool.Select) Tool = SiteTool.Select;
                 else Selection = null;
                 e.Handled = true;
                 break;
             case Key.Enter when _runStart is not null:
                 CancelPending();
+                e.Handled = true;
+                break;
+            case Key.Enter when Tool == SiteTool.Feature && FeatureKind == SiteFeatureKind.Road && Station is { } station:
+                CommitRoad(station);
+                e.Handled = true;
+                break;
+            case Key.Back when _featurePoints.Count > 0:
+                _featurePoints.RemoveAt(_featurePoints.Count - 1);
+                InvalidateVisual();
                 e.Handled = true;
                 break;
             case Key.Delete:
@@ -627,10 +837,21 @@ public sealed class SitePlanCanvas : PlanCanvasBase
         }
     }
 
+    private bool HasPending => _linkStart is not null || _runStart is not null || _featurePoints.Count > 0;
+
     public void RotateSelection(int direction, double degrees = 90)
     {
-        if (Selection is not ModuleInstance inst) return;
-        inst.RotationDegrees = Pose2.NormalizeDegrees(inst.RotationDegrees + direction * degrees);
+        switch (Selection)
+        {
+            case ModuleInstance inst:
+                inst.RotationDegrees = Pose2.NormalizeDegrees(inst.RotationDegrees + direction * degrees);
+                break;
+            case SiteFeature { Kind: not SiteFeatureKind.Road } f:
+                f.RotationDegrees = Pose2.NormalizeDegrees(f.RotationDegrees + direction * degrees);
+                break;
+            default:
+                return;
+        }
         Complete();
     }
 
@@ -642,6 +863,7 @@ public sealed class SitePlanCanvas : PlanCanvasBase
             case ModuleInstance inst: s.Modules.Remove(inst); break;
             case ConnectorLink link: s.Links.Remove(link); break;
             case UtilityRun run: s.UtilityRuns.Remove(run); break;
+            case SiteFeature f: s.Features.Remove(f); break;
             default: return;
         }
         Selection = null;

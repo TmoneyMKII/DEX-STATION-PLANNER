@@ -107,6 +107,12 @@
                                  IsChecked="{Binding Tool, Converter={StaticResource EnumEquals}, ConverterParameter=Utility}">Utility run</RadioButton>
                     <ComboBox ItemsSource="{Binding UtilityKinds}" SelectedItem="{Binding UtilityKind}" MinWidth="110" Margin="4,0,0,0" ToolTip="Utility type for new runs" />
                     <Border Style="{StaticResource Dex.Divider}" />
+                    <RadioButton Style="{StaticResource Dex.ToolButton}" GroupName="SiteTool"
+                                 ToolTip="Place infrastructure. Runways and piers: click both ends. Roads: click points, double-click or Enter to finish. Others: one click (F)"
+                                 IsChecked="{Binding Tool, Converter={StaticResource EnumEquals}, ConverterParameter=Feature}">Infrastructure</RadioButton>
+                    <ComboBox ItemsSource="{Binding FeatureKinds}" SelectedItem="{Binding FeatureKind}" MinWidth="120" Margin="4,0,0,0"
+                              ToolTip="Kind of infrastructure to place" SelectionChanged="FeatureKind_SelectionChanged" />
+                    <Border Style="{StaticResource Dex.Divider}" />
                     <Button Style="{StaticResource Dex.IconButton}" ToolTip="Rotate selected module 90° (R)" Click="Rotate_Click">
                         <TextBlock Style="{StaticResource Dex.Icon}" Text="&#xE7AD;" FontSize="14" />
                     </Button>
@@ -125,6 +131,7 @@
                                      Tool="{Binding Tool, Mode=TwoWay}"
                                      Selection="{Binding Selection, Mode=TwoWay}"
                                      UtilityKind="{Binding UtilityKind}"
+                                     FeatureKind="{Binding FeatureKind}"
                                      SnapEnabled="{Binding SnapEnabled}"
                                      Units="{Binding Project.DisplayUnits}" />
             <TextBlock Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource Dex.Muted}"

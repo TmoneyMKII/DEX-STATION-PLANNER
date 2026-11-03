@@ -49,6 +49,16 @@
                             HorizontalAlignment="Stretch" Margin="0,12,0,0" Click="PlaceButton_Click" />
                     <Button Content="Fly to station" HorizontalAlignment="Stretch" Margin="0,6,0,0" Click="FlyButton_Click" />
 
+                    <TextBlock Style="{StaticResource Dex.SectionHeader}" Text="Add infrastructure" />
+                    <TextBlock Style="{StaticResource Dex.Muted}" FontSize="11" Margin="0,0,0,6"
+                               Text="Runways and piers: click both ends. Roads: click points, then double-click or press Enter. Everything else: one click." />
+                    <DockPanel>
+                        <Button x:Name="PlaceFeatureButton" DockPanel.Dock="Right" Content="Place" Margin="6,0,0,0" Click="PlaceFeatureButton_Click" />
+                        <ComboBox ItemsSource="{Binding Stations.FeatureKinds}" SelectedItem="{Binding Stations.FeatureKind}" HorizontalAlignment="Stretch" />
+                    </DockPanel>
+                    <TextBlock x:Name="FeatureHint" Style="{StaticResource Dex.Muted}" FontSize="11" Margin="0,4,0,0" Foreground="{DynamicResource Dex.Warning}"
+                               Text="Place the station first; infrastructure is positioned relative to it." Visibility="Collapsed" />
+
                     <TextBlock Style="{StaticResource Dex.SectionHeader}" Text="Known research sites" />
                     <TextBlock Style="{StaticResource Dex.Muted}" FontSize="11" Margin="0,0,0,6"
                                Text="Click to fly there. Use the button to move the selected station to that site." />

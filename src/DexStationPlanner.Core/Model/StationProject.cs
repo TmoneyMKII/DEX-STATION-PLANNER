@@ -6,7 +6,8 @@ namespace DexStationPlanner.Core.Model;
 /// <summary>The root document saved as a .dexstation file.</summary>
 public sealed class StationProject : ObservableObject
 {
-    public const int CurrentSchemaVersion = 1;
+    // 2: added Station.Features (site infrastructure).
+    public const int CurrentSchemaVersion = 2;
 
     public int SchemaVersion { get; set; } = CurrentSchemaVersion;
     public string Name { get; set => SetProperty(ref field, value); } = "Untitled Project";
@@ -19,6 +20,9 @@ public sealed class StationProject : ObservableObject
 
     /// <summary>Project-specific equipment added on top of the built-in catalog.</summary>
     public ObservableCollection<EquipmentDefinition> CustomEquipment { get; init; } = [];
+
+    /// <summary>Project-specific aircraft, ships and vehicles added on top of the built-in catalog.</summary>
+    public ObservableCollection<Logistics.VehicleDefinition> CustomVehicles { get; init; } = [];
 
     public ObservableCollection<ModuleDefinition> Modules { get; init; } = [];
     public ObservableCollection<Station> Stations { get; init; } = [];

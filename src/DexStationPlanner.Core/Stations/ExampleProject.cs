@@ -59,6 +59,29 @@ public static class ExampleProject
             Kind = UtilityKind.Fuel, FromModule = power.Id, ToModule = galley.Id, Label = "Galley fuel",
             Waypoints = { new Vec2(22, 14) },
         });
+
+        // Infrastructure: a long groomed skiway south-east of camp, the track to it, fuel, cargo and a clean-air sector.
+        var skiway = SiteFeatureDefaults.Create(SiteFeatureKind.Runway, station.Environment, Vec2.Zero);
+        skiway.Name = "Skiway";
+        skiway.Width = 60;
+        SiteFeatureDefaults.SetEnds(skiway, new Vec2(-1400, -900), new Vec2(3000, -900));
+        station.Features.Add(skiway);
+
+        var track = SiteFeatureDefaults.Create(SiteFeatureKind.Road, station.Environment, Vec2.Zero);
+        track.Name = "Skiway track";
+        foreach (var p in new[] { new Vec2(10, -14), new Vec2(10, -300), new Vec2(200, -840) }) track.Path.Add(p);
+        station.Features.Add(track);
+
+        var fuel = SiteFeatureDefaults.Create(SiteFeatureKind.FuelFarm, station.Environment, new Vec2(60, 14));
+        fuel.CapacityLiters = 400_000;
+        station.Features.Add(fuel);
+
+        station.Features.Add(SiteFeatureDefaults.Create(SiteFeatureKind.CargoYard, station.Environment, new Vec2(80, -60)));
+
+        var cleanAir = SiteFeatureDefaults.Create(SiteFeatureKind.ScienceSite, station.Environment, new Vec2(-250, 600));
+        cleanAir.Name = "Clean air sector";
+        cleanAir.Length = 300;
+        station.Features.Add(cleanAir);
         return project;
     }
 

@@ -5,6 +5,7 @@ using DexStationPlanner.App.Editors;
 using DexStationPlanner.App.Services;
 using DexStationPlanner.Core.Equipment;
 using DexStationPlanner.Core.Geometry;
+using DexStationPlanner.Core.Logistics;
 using DexStationPlanner.Core.Model;
 using DexStationPlanner.Core.Modules;
 using DexStationPlanner.Core.Stations;
@@ -305,6 +306,89 @@ public sealed class LinkEditor : ElementEditor
     }
 
     public double CorridorWidth { get => D(Link.CorridorWidth); set => Link.CorridorWidth = Math.Clamp(M(value), 0.6, 10); }
+}
+
+/// <summary>One vehicle's verdict for a feature or station.</summary>
+public sealed record AccessRow(string Vehicle, string Mode, bool Ok, string Reason);
+
+public sealed class FeatureEditor : ElementEditor
+{
+    private const double LitersPerUsGallon = 3.785411784;
+    private readonly Station _station;
+    private readonly VehicleLookup _vehicles;
+
+    public FeatureEditor(SiteFeature feature, Station station, VehicleLookup vehicles)
+    {
+        Feature = feature;
+        _station = station;
+        _vehicles = vehicles;
+        Watch(feature, station.Site);
+        feature.Path.CollectionChanged += (_, _) => OnPropertyChanged(string.Empty);
+    }
+
+    public SiteFeature Feature { get; }
+
+    public override string Title => Feature.Kind switch
+    {
+        SiteFeatureKind.Runway => Feature.Surface is SurfaceType.Snow or SurfaceType.BlueIce ? "Skiway / ice runway" : "Runway",
+        SiteFeatureKind.Port => "Port / landing",
+        SiteFeatureKind.Road => "Road / track",
+        SiteFeatureKind.FuelFarm => "Fuel farm",
+        SiteFeatureKind.CargoYard => "Cargo yard",
+        SiteFeatureKind.ScienceSite => "Science site",
+        _ => "Helipad",
+    };
+
+    public bool IsRunway => Feature.Kind == SiteFeatureKind.Runway;
+    public bool IsPort => Feature.Kind == SiteFeatureKind.Port;
+    public bool IsRoad => Feature.Kind == SiteFeatureKind.Road;
+    public bool IsFuelFarm => Feature.Kind == SiteFeatureKind.FuelFarm;
+    public bool HasSurface => Feature.Kind is SiteFeatureKind.Runway or SiteFeatureKind.Helipad or SiteFeatureKind.Road;
+    public bool HasPosition => !IsRoad;
+    public bool HasLength => !IsRoad;
+    public bool HasWidth => Feature.Kind is SiteFeatureKind.Runway or SiteFeatureKind.Port or SiteFeatureKind.Road
+                                         or SiteFeatureKind.FuelFarm or SiteFeatureKind.CargoYard;
+    public bool HasRotation => HasWidth && !IsRoad;
+
+    public IReadOnlyList<SurfaceType> Surfaces { get; } = [SurfaceType.Paved, SurfaceType.Gravel, SurfaceType.Snow, SurfaceType.BlueIce];
+    public IReadOnlyList<PortKind> PortKinds { get; } = Enum.GetValues<PortKind>();
+
+    public string LengthLabel => Feature.Kind switch
+    {
+        SiteFeatureKind.Helipad => "Pad diameter",
+        SiteFeatureKind.ScienceSite => "Zone diameter",
+        SiteFeatureKind.Port => "Berth length",
+        _ => "Length",
+    };
+
+    public double X { get => D(Feature.Position.X); set => Feature.Position = new Vec2(M(value), Feature.Position.Y); }
+    public double Y { get => D(Feature.Position.Y); set => Feature.Position = new Vec2(Feature.Position.X, M(value)); }
+    public double Length { get => D(Feature.Length); set => Feature.Length = Math.Max(1, M(value)); }
+    public double Width { get => D(Feature.Width); set => Feature.Width = Math.Max(0.5, M(value)); }
+    public double Rotation { get => Feature.RotationDegrees; set => Feature.RotationDegrees = Pose2.NormalizeDegrees(value); }
+    public double WaterDepth { get => D(Feature.WaterDepth); set => Feature.WaterDepth = Math.Max(0, M(value)); }
+
+    public string CapacityUnit => Units.System == UnitSystem.Metric ? "L" : "US gal";
+
+    public double Capacity
+    {
+        get => Math.Round(Units.System == UnitSystem.Metric ? Feature.CapacityLiters : Feature.CapacityLiters / LitersPerUsGallon);
+        set => Feature.CapacityLiters = Math.Max(0, Units.System == UnitSystem.Metric ? value : value * LitersPerUsGallon);
+    }
+
+    public string Designation => FeatureGeometry.RunwayDesignation(Feature, _station.Site.GridHeadingDegrees);
+    public string RoadLength => UnitFormatter.Length(FeatureGeometry.RoadLength(Feature), Units.System, 0);
+
+    public string DistanceFromCamp =>
+        UnitFormatter.Length(IsRoad ? (Feature.Path.Count > 0 ? Feature.Path.Min(p => p.Length) : 0) : Feature.Position.Length, Units.System, 0);
+
+    public IReadOnlyList<AccessRow> Access =>
+        Compatibility.FeatureAccess(Feature, _vehicles.All(), _station.Site.GroundElevation, Units.System)
+            .Select(c => new AccessRow(c.Vehicle.Name, c.Vehicle.Mode.ToString(), c.Ok, c.Reason))
+            .OrderByDescending(r => r.Ok)
+            .ToList();
+
+    public bool HasAccess => Access.Count > 0;
 }
 
 public sealed class UtilityRunEditor : ElementEditor

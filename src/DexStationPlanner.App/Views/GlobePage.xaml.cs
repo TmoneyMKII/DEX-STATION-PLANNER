@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using DexStationPlanner.App.Services;
 using DexStationPlanner.App.ViewModels;
+using DexStationPlanner.Core.Geometry;
 using DexStationPlanner.Core.Globe;
 using DexStationPlanner.Core.Model;
 using DexStationPlanner.Core.Serialization;
@@ -128,16 +129,35 @@ public partial class GlobePage : UserControl
                 if (_placementRequested) BeginPlacement();
                 break;
             case "placed":
+            {
                 _placementRequested = false;
                 PlaceButton.IsEnabled = true;
-                double? height = root.TryGetProperty("height", out var h) && h.ValueKind == JsonValueKind.Number ? h.GetDouble() : null;
-                _vm?.Stations.SetLocation(root.GetProperty("lat").GetDouble(), root.GetProperty("lon").GetDouble(), height);
-                AppStatus.Set("Station placed.");
-                FlyToSelected(force: true);
+                PlaceFeatureButton.IsEnabled = true;
+                var points = root.GetProperty("points").EnumerateArray().Select(p => new GeoPoint(
+                    p.GetProperty("lat").GetDouble(),
+                    p.GetProperty("lon").GetDouble(),
+                    p.TryGetProperty("height", out var h) && h.ValueKind == JsonValueKind.Number ? h.GetDouble() : double.NaN)).ToList();
+                if (points.Count == 0 || _vm is null) break;
+                var purpose = root.GetProperty("purpose").GetString();
+                if (purpose == "station")
+                {
+                    var first = points[0];
+                    _vm.Stations.SetLocation(first.Latitude, first.Longitude, double.IsNaN(first.Height) ? null : first.Height);
+                    AppStatus.Set("Station placed.");
+                    FlyToSelected(force: true);
+                }
+                else if (Enum.TryParse<SiteFeatureKind>(purpose, out var kind))
+                {
+                    AppStatus.Set(_vm.Stations.AddFeatureFromGlobe(kind, points)
+                        ? $"{Converters.HumanizeConverter.Humanize(kind)} added. Edit it on the Stations page."
+                        : $"{Converters.HumanizeConverter.Humanize(kind)} not added: it needs more points.");
+                }
                 break;
+            }
             case "placeCancelled":
                 _placementRequested = false;
                 PlaceButton.IsEnabled = true;
+                PlaceFeatureButton.IsEnabled = true;
                 break;
             case "log":
                 var message = root.TryGetProperty("message", out var m) ? m.GetString() : "";
@@ -194,8 +214,28 @@ public partial class GlobePage : UserControl
     private void BeginPlacement()
     {
         if (_vm?.Stations.SelectedStation is not { } s) return;
-        Post(new { type = "placeMode", enabled = true, name = s.Name });
+        Post(new { type = "placeMode", enabled = true, name = s.Name, points = 1, purpose = "station" });
         PlaceButton.IsEnabled = false;
+        Web.Focus();
+    }
+
+    private void PlaceFeatureButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_pageReady || _vm?.Stations.SelectedStation is not { } s) return;
+        if (!s.Site.IsPlaced)
+        {
+            FeatureHint.Visibility = Visibility.Visible;
+            return;
+        }
+        FeatureHint.Visibility = Visibility.Collapsed;
+        var kind = _vm.Stations.FeatureKind;
+        Post(new
+        {
+            type = "placeMode", enabled = true,
+            name = $"{Converters.HumanizeConverter.Humanize(kind).ToLowerInvariant()} for {s.Name}",
+            points = StationsViewModel.GlobePointsFor(kind), purpose = kind.ToString(),
+        });
+        PlaceFeatureButton.IsEnabled = false;
         Web.Focus();
     }
 

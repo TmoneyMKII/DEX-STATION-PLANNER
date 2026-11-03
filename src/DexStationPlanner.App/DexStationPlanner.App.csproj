@@ -12,7 +12,7 @@
     <Product>DEX Station Planner</Product>
     <Company>Diversified Exploration Works</Company>
     <Copyright>Copyright © Diversified Exploration Works</Copyright>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <!-- WPF Fluent ThemeMode is marked experimental in .NET 9/10. -->
     <NoWarn>$(NoWarn);WPF0001</NoWarn>
   </PropertyGroup>

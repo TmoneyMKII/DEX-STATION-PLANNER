@@ -20,6 +20,9 @@ public sealed class Station : ObservableObject
     public ObservableCollection<ModuleInstance> Modules { get; init; } = [];
     public ObservableCollection<ConnectorLink> Links { get; init; } = [];
     public ObservableCollection<UtilityRun> UtilityRuns { get; init; } = [];
+
+    /// <summary>Airfields, helipads, ports, roads and other infrastructure around the station.</summary>
+    public ObservableCollection<SiteFeature> Features { get; init; } = [];
 }
 
 /// <summary>Where the station's site grid origin sits on Earth.</summary>

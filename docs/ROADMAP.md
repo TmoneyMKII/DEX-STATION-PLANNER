@@ -5,9 +5,10 @@ The end goal: design a station, simulate how it is supplied and operated, then p
 ## ✅ Milestone 1: Foundation (v0.1)
 Module designer (grid, straight and curved walls, openings, connectors, equipment, elevation, 3D preview), station builder (snapping connectors, corridors, utility runs), globe placement, project files, undo/redo, themes and units.
 
-## Milestone 2: Site infrastructure
-- Place **airfields/skiways, helipads, ports/piers, roads, fuel farms, cargo yards and science sites** on the site plan and globe.
-- Aircraft, vessel and vehicle catalogs (e.g. LC-130, Twin Otter, Basler BT-67, helicopters, icebreakers, tractor traverses) with payload, range and runway requirements.
+## ✅ Milestone 2: Site infrastructure (v0.2)
+Runways/skiways, helipads, ports, roads, fuel farms, cargo yards and science sites on the site plan and globe; transport catalog (LC-130, C-17, Basler, Twin Otter, helicopters, icebreakers and ships, traverses and trucks); compatibility checks and the Logistics page.
+
+Still to do from this milestone:
 - Seasonal access windows by environment (polar summer, monsoon, high-altitude weather).
 - Terrain-aware placement (slope and elevation from ion terrain) and real module 3D models (glTF) on the globe.
 

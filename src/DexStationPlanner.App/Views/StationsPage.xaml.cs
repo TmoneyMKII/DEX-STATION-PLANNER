@@ -35,6 +35,7 @@ public partial class StationsPage : UserControl
             Key.V => SiteTool.Select,
             Key.L => SiteTool.Link,
             Key.U => SiteTool.Utility,
+            Key.F => SiteTool.Feature,
             _ => null,
         };
         if (tool is { } t)
@@ -58,6 +59,14 @@ public partial class StationsPage : UserControl
     }
 
     private void ZoomFit_Click(object sender, RoutedEventArgs e) => Site.ZoomToFit();
+
+    /// <summary>Picking a kind means the user wants to place one, so switch to the Infrastructure tool.</summary>
+    private void FeatureKind_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (Vm is not { } vm || !IsLoaded || e.RemovedItems.Count == 0) return;
+        vm.Tool = SiteTool.Feature;
+        Site.Focus();
+    }
 
     private void KnownSiteBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {

@@ -23,7 +23,11 @@ StationProject                    (.dexstation file root)
     ├── Site           lat/lon, ground elevation, grid heading
     ├── Modules[]      ModuleInstance: definition id + pose on the site grid
     ├── Links[]        connector to connector (mated, or a corridor when apart)
-    └── UtilityRuns[]  typed polylines between modules
+    ├── UtilityRuns[]  typed polylines between modules
+    └── Features[]     SiteFeature: runway, helipad, port, road, fuel farm, cargo yard, science site
+
+Core/Logistics: VehicleDefinition catalog (BuiltInVehicles.json + project CustomVehicles) and
+Compatibility checks of vehicles against features and site elevation.
 ```
 
 Model classes are `ObservableObject`s, so the UI binds to them directly. Derived data (footprints, stats, meshes) is always computed, never stored.
@@ -56,9 +60,9 @@ Model classes are `ObservableObject`s, so the UI binds to them directly. Derived
 | App → page | `init` | `ionToken`, `theme` |
 | App → page | `scene` | `GlobeScene` (volumes and lines in ENU meters) |
 | App → page | `flyTo` | `lat`, `lon`, `range` or `toStation` |
-| App → page | `placeMode` | `enabled`, `name` |
+| App → page | `placeMode` | `enabled`, `name`, `points` (1, 2, or 0 = until double-click/Enter), `purpose` ("station" or a feature kind) |
 | App → page | `theme` | `dark` or `light` |
-| Page → app | `ready`, `placed {lat, lon, height}`, `placeCancelled`, `log {level, message}` | |
+| Page → app | `ready`, `placed {purpose, points: [{lat, lon, height}]}`, `placeCancelled`, `log {level, message}` | |
 
 Messages sent before `init` finishes are queued by the page and replayed.
 

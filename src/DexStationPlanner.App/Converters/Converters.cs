@@ -49,6 +49,39 @@ public sealed class BoolToVisibilityConverter : IValueConverter
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => Binding.DoNothing;
 }
 
+/// <summary>Friendly text for enum values: "FuelFarm" becomes "Fuel farm", with a few domain-specific overrides.</summary>
+public sealed class HumanizeConverter : IValueConverter
+{
+    private static readonly Dictionary<string, string> Overrides = new()
+    {
+        ["Runway"] = "Runway / skiway",
+        ["Port"] = "Port / pier",
+        ["Road"] = "Road / track",
+        ["Snow"] = "Groomed snow",
+        ["FixedWing"] = "Fixed-wing aircraft",
+        ["Rotorcraft"] = "Helicopters",
+        ["Ship"] = "Ships",
+        ["Overland"] = "Overland vehicles",
+    };
+
+    public static string Humanize(object? value)
+    {
+        var s = value?.ToString() ?? "";
+        if (Overrides.TryGetValue(s, out var o)) return o;
+        var sb = new System.Text.StringBuilder();
+        for (var i = 0; i < s.Length; i++)
+        {
+            if (i > 0 && char.IsUpper(s[i])) sb.Append(' ').Append(char.ToLowerInvariant(s[i]));
+            else sb.Append(s[i]);
+        }
+        return sb.ToString();
+    }
+
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => Humanize(value);
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => Binding.DoNothing;
+}
+
 /// <summary>"#RRGGBB" to a brush, for swatches.</summary>
 public sealed class HexToBrushConverter : IValueConverter
 {

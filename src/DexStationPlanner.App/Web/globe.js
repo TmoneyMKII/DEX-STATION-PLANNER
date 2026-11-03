@@ -132,9 +132,28 @@
       },
     });
 
+    const featureLabels = new Cesium.DistanceDisplayCondition(0, 60000);
+    const featureLabel = (text, position) => add({
+      position,
+      label: {
+        text, font: "12px Segoe UI", fillColor: Cesium.Color.WHITE,
+        outlineColor: Cesium.Color.BLACK, outlineWidth: 3, style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        distanceDisplayCondition: featureLabels,
+      },
+    });
+
     for (const v of scene.volumes) {
       const positions = v.ring.map((p) => toWorld(frame, p));
       const color = Cesium.Color.fromCssColorString(v.color);
+      if (v.top <= v.bottom) {
+        // Flat infrastructure (runway, helipad, yard) is draped on the ground.
+        add({ id: v.id, name: v.label, polygon: { hierarchy: new Cesium.PolygonHierarchy(positions), material: color.withAlpha(0.85) } });
+        featureLabel(v.label, Cesium.BoundingSphere.fromPoints(positions).center);
+        continue;
+      }
+      if (v.kind !== "module" && v.kind !== "corridor") featureLabel(v.label, Cesium.BoundingSphere.fromPoints(positions).center);
       add({
         id: v.id,
         name: v.label,
@@ -166,6 +185,13 @@
 
     for (const line of scene.lines) {
       const color = Cesium.Color.fromCssColorString(line.color);
+      if (line.widthM > 0) {
+        // Roads and tracks: a ground corridor with their real width.
+        const positions = line.points.map((p) => toWorld(frame, p));
+        add({ id: line.id, name: line.label, corridor: { positions, width: line.widthM, material: color.withAlpha(0.9) } });
+        featureLabel(line.label, positions[Math.floor(positions.length / 2)]);
+        continue;
+      }
       add({
         id: line.id,
         name: line.label,
@@ -179,11 +205,17 @@
     }
   }
 
-  /** Bounding sphere of everything drawn for the station (or a 50 m sphere at the origin). */
+  /**
+   * Bounding sphere of the station buildings (modules and corridors), so "fly to station" frames the camp
+   * rather than an airfield kilometers away. Falls back to everything, then to a 50 m sphere at the origin.
+   */
   function siteSphere(frame, scene) {
-    const pts = [];
-    for (const v of scene.volumes) for (const p of v.ring) pts.push(toWorld(frame, p));
-    for (const l of scene.lines) for (const p of l.points) pts.push(toWorld(frame, p));
+    let pts = [];
+    for (const v of scene.volumes) if (v.kind === "module" || v.kind === "corridor") for (const p of v.ring) pts.push(toWorld(frame, p));
+    if (pts.length === 0) {
+      for (const v of scene.volumes) for (const p of v.ring) pts.push(toWorld(frame, p));
+      for (const l of scene.lines) for (const p of l.points) pts.push(toWorld(frame, p));
+    }
     if (pts.length === 0) return new Cesium.BoundingSphere(Cesium.Cartesian3.fromDegrees(scene.longitude, scene.latitude, 0), 50);
     return Cesium.BoundingSphere.fromPoints(pts);
   }
@@ -200,11 +232,51 @@
 
   // ---------------------------------------------------------------- placement
 
-  function setPlacing(enabled, name) {
-    placing = enabled;
-    $("place-name").textContent = name || "the station";
+  // A placement collects `points` clicks (0 = any number, finished by double-click or Enter) and reports
+  // them back tagged with `purpose` ("station" or a feature kind).
+  let pickedPoints = [];
+  let pickEntity = null;
+
+  function setPlacing(enabled, options) {
+    const opts = options || {};
+    placing = enabled ? { name: opts.name || "the station", points: opts.points ?? 1, purpose: opts.purpose || "station" } : false;
+    pickedPoints = [];
+    if (pickEntity) { viewer.entities.remove(pickEntity); pickEntity = null; }
+    if (enabled) {
+      const howTo = placing.points === 1 ? "Click the globe to place"
+        : placing.points === 2 ? "Click both ends of"
+        : "Click points along";
+      const finish = placing.points === 0 ? " Double-click or press <kbd>Enter</kbd> to finish." : "";
+      $("place-banner").innerHTML = `${howTo} <strong></strong>.${finish} Press <kbd>Esc</kbd> to cancel.`;
+      $("place-banner").querySelector("strong").textContent = placing.name;
+      pickEntity = viewer.entities.add({
+        polyline: {
+          positions: new Cesium.CallbackProperty(() => pickedPoints.map((c) => Cesium.Cartographic.toCartesian(c)), false),
+          width: 3, clampToGround: true, material: Cesium.Color.fromCssColorString("#f2b230"),
+        },
+      });
+    }
     $("place-banner").classList.toggle("hidden", !enabled);
-    document.body.classList.toggle("placing", enabled);
+    document.body.classList.toggle("placing", !!enabled);
+  }
+
+  function finishPlacing() {
+    const purpose = placing.purpose;
+    const points = pickedPoints.map((c) => ({
+      lat: Cesium.Math.toDegrees(c.latitude),
+      lon: Cesium.Math.toDegrees(c.longitude),
+      height: ionToken ? c.height : null,
+    }));
+    setPlacing(false);
+    send({ type: "placed", purpose, points });
+  }
+
+  function addPick(carto) {
+    const last = pickedPoints[pickedPoints.length - 1];
+    // A double-click also fires two single clicks at the same spot; ignore the repeat.
+    if (last && Math.abs(last.latitude - carto.latitude) < 1e-9 && Math.abs(last.longitude - carto.longitude) < 1e-9) return;
+    pickedPoints.push(carto);
+    if (placing.points > 0 && pickedPoints.length >= placing.points) finishPlacing();
   }
 
   function pickGlobe(windowPosition) {
@@ -242,24 +314,28 @@
     await setImagery($("imagery").value);
     $("imagery").addEventListener("change", (e) => setImagery(e.target.value));
 
+    // Double-click normally zooms to and tracks an entity; here it finishes road placement instead.
+    viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
     const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
     handler.setInputAction((click) => {
       if (!placing) return;
       const carto = pickGlobe(click.position);
-      if (!carto) return;
-      setPlacing(false);
-      send({
-        type: "placed",
-        lat: Cesium.Math.toDegrees(carto.latitude),
-        lon: Cesium.Math.toDegrees(carto.longitude),
-        height: ionToken ? carto.height : null,
-      });
+      if (carto) addPick(carto);
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    handler.setInputAction(() => {
+      if (placing && placing.points === 0 && pickedPoints.length >= 2) finishPlacing();
+    }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && placing) {
+      if (!placing) return;
+      if (e.key === "Escape") {
         setPlacing(false);
         send({ type: "placeCancelled" });
+      } else if (e.key === "Enter" && placing.points === 0 && pickedPoints.length >= 2) {
+        finishPlacing();
+      } else if (e.key === "Backspace" && pickedPoints.length > 0) {
+        pickedPoints.pop();
       }
     });
 
@@ -287,7 +363,7 @@
     switch (msg.type) {
       case "scene": renderScene(msg.scene); break;
       case "flyTo": flyTo(msg.lat, msg.lon, msg.range, msg.toStation); break;
-      case "placeMode": setPlacing(msg.enabled, msg.name); break;
+      case "placeMode": setPlacing(msg.enabled, msg); break;
       case "theme": setTheme(msg.theme); break;
     }
   }

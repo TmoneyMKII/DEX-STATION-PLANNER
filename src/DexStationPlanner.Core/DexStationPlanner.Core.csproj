@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Equipment\BuiltInEquipment.json" LogicalName="DexStationPlanner.Core.Equipment.BuiltInEquipment.json" />
+    <EmbeddedResource Include="Logistics\BuiltInVehicles.json" LogicalName="DexStationPlanner.Core.Logistics.BuiltInVehicles.json" />
   </ItemGroup>
 
 </Project>

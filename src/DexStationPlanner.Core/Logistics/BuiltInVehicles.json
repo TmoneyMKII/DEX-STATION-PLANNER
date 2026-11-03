@@ -1,0 +1,111 @@
+[
+  {
+    "id": "air.lc130h", "name": "LC-130H Hercules (ski)", "mode": "FixedWing",
+    "description": "Ski-equipped Hercules, the workhorse of deep-field and South Pole resupply. Typical ski payload around 26,000 lb.",
+    "payloadKg": 11800, "passengers": 40, "cruiseSpeedKmh": 540, "rangeKm": 3800, "fuelBurnLitersPerHour": 3100, "fuelType": "JP-8 / AN8",
+    "maxSiteElevationM": 3400, "minRunwayWidthM": 45,
+    "runwayLengthM": { "Snow": 3000, "BlueIce": 3000, "Paved": 1500, "Gravel": 1500 }
+  },
+  {
+    "id": "air.c17a", "name": "C-17A Globemaster III", "mode": "FixedWing",
+    "description": "Heavy wheeled airlifter for the intercontinental leg to ice or paved runways (e.g. Christchurch to McMurdo). Cannot land on snow.",
+    "payloadKg": 45000, "passengers": 100, "cruiseSpeedKmh": 830, "rangeKm": 4400, "fuelBurnLitersPerHour": 10500, "fuelType": "JP-8",
+    "maxSiteElevationM": 3000, "minRunwayWidthM": 30,
+    "runwayLengthM": { "Paved": 2400, "BlueIce": 3000, "Gravel": 1200 }
+  },
+  {
+    "id": "air.basler-bt67", "name": "Basler BT-67 (ski)", "mode": "FixedWing",
+    "description": "Turbine-converted DC-3 on skis. Long-range polar utility aircraft that reaches high plateau sites.",
+    "payloadKg": 3600, "passengers": 18, "cruiseSpeedKmh": 370, "rangeKm": 2100, "fuelBurnLitersPerHour": 500, "fuelType": "Jet A-1 / AN8",
+    "maxSiteElevationM": 4100, "minRunwayWidthM": 25,
+    "runwayLengthM": { "Snow": 1000, "BlueIce": 1200, "Gravel": 900, "Paved": 800 }
+  },
+  {
+    "id": "air.dhc6-twin-otter", "name": "DHC-6 Twin Otter (ski)", "mode": "FixedWing",
+    "description": "Rugged STOL utility aircraft on wheel-skis for field camps and short, rough strips.",
+    "payloadKg": 1100, "passengers": 10, "cruiseSpeedKmh": 280, "rangeKm": 1400, "fuelBurnLitersPerHour": 300, "fuelType": "Jet A-1 / AN8",
+    "maxSiteElevationM": 4500, "minRunwayWidthM": 15,
+    "runwayLengthM": { "Snow": 500, "BlueIce": 600, "Gravel": 400, "Paved": 400 }
+  },
+
+  {
+    "id": "heli.h125", "name": "Airbus H125 (AS350 B3e)", "mode": "Rotorcraft",
+    "description": "Light single-engine helicopter with exceptional high-altitude performance; common for mountain and field support.",
+    "payloadKg": 900, "passengers": 5, "cruiseSpeedKmh": 245, "rangeKm": 610, "fuelBurnLitersPerHour": 180, "fuelType": "Jet A-1",
+    "maxSiteElevationM": 7000, "rotorDiameterM": 12.9
+  },
+  {
+    "id": "heli.bell212", "name": "Bell 212", "mode": "Rotorcraft",
+    "description": "Medium twin-engine utility helicopter used for ship-to-shore and polar field work.",
+    "payloadKg": 1800, "passengers": 14, "cruiseSpeedKmh": 185, "rangeKm": 440, "fuelBurnLitersPerHour": 380, "fuelType": "Jet A-1",
+    "maxSiteElevationM": 4000, "rotorDiameterM": 17.5
+  },
+  {
+    "id": "heli.bell412", "name": "Bell 412EPX", "mode": "Rotorcraft",
+    "description": "Medium twin with a four-blade rotor; better hot-and-high performance than the 212.",
+    "payloadKg": 1800, "passengers": 13, "cruiseSpeedKmh": 226, "rangeKm": 745, "fuelBurnLitersPerHour": 400, "fuelType": "Jet A-1",
+    "maxSiteElevationM": 5500, "rotorDiameterM": 17.1
+  },
+  {
+    "id": "heli.mi8", "name": "Mi-8AMT / Mi-171", "mode": "Rotorcraft",
+    "description": "Medium-heavy transport helicopter; large cabin and sling loads for remote construction.",
+    "payloadKg": 4000, "passengers": 24, "cruiseSpeedKmh": 230, "rangeKm": 580, "fuelBurnLitersPerHour": 750, "fuelType": "Jet A-1 / TS-1",
+    "maxSiteElevationM": 5000, "rotorDiameterM": 25.3
+  },
+
+  {
+    "id": "ship.polar-icebreaker", "name": "Heavy polar icebreaker", "mode": "Ship",
+    "description": "Breaks a channel through sea ice for cargo and fuel ships. Carries only limited cargo itself.",
+    "payloadKg": 250000, "passengers": 30, "cruiseSpeedKmh": 28, "rangeKm": 30000, "fuelBurnLitersPerHour": 2500, "fuelType": "Marine diesel",
+    "draftM": 10, "lengthM": 122
+  },
+  {
+    "id": "ship.ice-class-cargo", "name": "Ice-class cargo ship", "mode": "Ship",
+    "description": "Annual sealift of containers, vehicles and dry cargo, usually escorted by an icebreaker.",
+    "payloadKg": 8000000, "passengers": 0, "cruiseSpeedKmh": 28, "rangeKm": 20000, "fuelBurnLitersPerHour": 1500, "fuelType": "Marine diesel",
+    "draftM": 9.5, "lengthM": 150
+  },
+  {
+    "id": "ship.ice-class-tanker", "name": "Ice-class fuel tanker", "mode": "Ship",
+    "description": "Delivers the season's bulk fuel (on the order of 20 million liters) to an ice pier or offshore hose.",
+    "payloadKg": 20000000, "passengers": 0, "cruiseSpeedKmh": 26, "rangeKm": 20000, "fuelBurnLitersPerHour": 1800, "fuelType": "Marine diesel",
+    "draftM": 10, "lengthM": 170
+  },
+  {
+    "id": "ship.research-supply", "name": "Ice-strengthened research/supply vessel", "mode": "Ship",
+    "description": "Smaller vessel for personnel, science gear and light cargo to coastal stations.",
+    "payloadKg": 500000, "passengers": 30, "cruiseSpeedKmh": 22, "rangeKm": 15000, "fuelBurnLitersPerHour": 600, "fuelType": "Marine diesel",
+    "draftM": 5.5, "lengthM": 70
+  },
+  {
+    "id": "ship.landing-craft", "name": "Landing craft / barge", "mode": "Ship",
+    "description": "Shallow-draft craft for beach landings where there is no pier.",
+    "payloadKg": 300000, "passengers": 0, "cruiseSpeedKmh": 15, "rangeKm": 500, "fuelBurnLitersPerHour": 150, "fuelType": "Marine diesel",
+    "draftM": 1.5, "lengthM": 40
+  },
+
+  {
+    "id": "land.tractor-traverse", "name": "Heavy tractor traverse (per tractor-sled unit)", "mode": "Overland",
+    "description": "Tracked tractor towing a sled train of fuel bladders and cargo over groomed snow (e.g. a South Pole traverse).",
+    "payloadKg": 40000, "passengers": 2, "cruiseSpeedKmh": 9, "rangeKm": 2000, "fuelBurnLitersPerHour": 60, "fuelType": "AN8 / diesel",
+    "maxSiteElevationM": 4200, "roadSurfaces": [ "Snow", "BlueIce" ], "minRoadWidthM": 8
+  },
+  {
+    "id": "land.tracked-snow-vehicle", "name": "Tracked over-snow vehicle", "mode": "Overland",
+    "description": "Sno-Cat/PistenBully-class vehicle for personnel and light cargo near the station.",
+    "payloadKg": 2000, "passengers": 6, "cruiseSpeedKmh": 20, "rangeKm": 400, "fuelBurnLitersPerHour": 25, "fuelType": "AN8 / diesel",
+    "maxSiteElevationM": 4500, "roadSurfaces": [ "Snow", "BlueIce", "Gravel" ], "minRoadWidthM": 5
+  },
+  {
+    "id": "land.6x6-truck", "name": "6×6 cargo truck (convoy unit)", "mode": "Overland",
+    "description": "All-terrain cargo truck for desert and mountain road convoys.",
+    "payloadKg": 10000, "passengers": 2, "cruiseSpeedKmh": 45, "rangeKm": 800, "fuelBurnLitersPerHour": 30, "fuelType": "Diesel",
+    "maxSiteElevationM": 5500, "roadSurfaces": [ "Paved", "Gravel" ], "minRoadWidthM": 4
+  },
+  {
+    "id": "land.4x4-utility", "name": "4×4 utility vehicle", "mode": "Overland",
+    "description": "Light vehicle for personnel and small cargo on roads and tracks.",
+    "payloadKg": 800, "passengers": 4, "cruiseSpeedKmh": 50, "rangeKm": 700, "fuelBurnLitersPerHour": 12, "fuelType": "Diesel",
+    "maxSiteElevationM": 5500, "roadSurfaces": [ "Paved", "Gravel" ], "minRoadWidthM": 3
+  }
+]

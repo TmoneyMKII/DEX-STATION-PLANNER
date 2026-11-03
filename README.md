@@ -15,7 +15,7 @@ Terrestrial sites are supported today; extraterrestrial sites are on the roadmap
 
 ![Module editor](docs/images/modules.png)
 
-## What it does today (v0.1, Milestone 1)
+## What it does today (v0.2, Milestones 1–2)
 
 **Module designer**
 - Start from ISO 10/20/40 ft and 40 ft high-cube containers, rectangles, round/dome, capsule, hexagon or octagon shells, or draw your own.
@@ -32,6 +32,11 @@ Terrestrial sites are supported today; extraterrestrial sites are on the roadmap
 - Utility runs (power, fuel, water, wastewater, heat, data) with draggable routes.
 - Station totals: area, mass, berths, power demand/supply/margin, corridor and utility lengths.
 
+**Site infrastructure & logistics**
+- Place runways/skiways, helipads, ports/piers/beach landings, roads and tracks, fuel farms, cargo yards and science sites, on the site plan or by clicking the globe (runways by both ends; works kilometers from camp, including near the poles).
+- Transport catalog: LC-130H, C-17A, Basler BT-67, Twin Otter, H125, Bell 212/412, Mi-8, polar icebreaker, ice-class cargo ship and tanker, research/supply vessel, landing craft, tractor traverse, over-snow vehicles and trucks.
+- Compatibility checks with plain-language reasons: runway surface, length and width; helipad size; berth depth and length; road surface; site elevation limits. Shown per feature and on the Logistics page.
+
 **Globe**
 - CesiumJS globe that works **without any account**: free Esri satellite or OpenStreetMap imagery over a bundled offline base layer that covers the poles.
 - Click to place a station, or jump to known sites (South Pole, McMurdo, Concordia, Summit, ALMA, Mauna Kea…).
@@ -44,6 +49,7 @@ Terrestrial sites are supported today; extraterrestrial sites are on the roadmap
 
 ![Station site plan](docs/images/stations.png)
 ![Globe](docs/images/globe.png)
+![Logistics](docs/images/logistics.png)
 
 ## Getting started
 
@@ -62,16 +68,16 @@ dotnet run --project src/DexStationPlanner.App
 ```
 Run the tests with `dotnet test`.
 
-Useful flags: `--example` opens the worked example station, and `--page Modules|Stations|Globe|Settings` picks the start page.
+Useful flags: `--example` opens the worked example station, and `--page Modules|Stations|Globe|Logistics|Settings` picks the start page.
 A `.dexstation` path opens that project.
 
 ### Keyboard shortcuts
 | Where | Keys |
 |---|---|
-| Anywhere | `Ctrl+N` new · `Ctrl+O` open · `Ctrl+S` save · `Ctrl+Z`/`Ctrl+Y` undo/redo · `Ctrl+1…4` switch page |
+| Anywhere | `Ctrl+N` new · `Ctrl+O` open · `Ctrl+S` save · `Ctrl+Z`/`Ctrl+Y` undo/redo · `Ctrl+1…5` switch page |
 | Plans | Wheel zoom · middle-drag or `Space`+drag pan · drag empty space to pan · `Del` delete · `Esc` cancel |
 | Module editor | `V` select · `S` shell · `W` wall · `A` curved wall · `D` door · `N` window · `C` connector · `R` rotate 90° (`Ctrl+R` 15°) · arrows nudge · `Shift` constrains to 45° · `Alt` disables snapping |
-| Station builder | `V` select · `L` corridor link · `U` utility run · `R` rotate · `Alt`+drag places without snapping |
+| Station builder | `V` select · `L` corridor link · `U` utility run · `F` infrastructure (`Enter`/double-click finishes a road) · `R` rotate · `Alt`+drag places without snapping |
 
 ## Project layout
 ```
