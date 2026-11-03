@@ -1,0 +1,291 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:DexStationPlanner.App.ViewModels">
+
+    <!-- Property panels for whatever is selected in the editors. Lengths are in the project's display units. -->
+
+    <Style x:Key="Dex.FieldGrid" TargetType="Grid">
+        <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+
+    <DataTemplate x:Key="Dex.StatsList">
+        <ItemsControl ItemsSource="{Binding}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type vm:StatRow}">
+                    <Grid Margin="0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding Label}" Style="{StaticResource Dex.Label}" />
+                        <TextBlock x:Name="Value" Grid.Column="1" Text="{Binding Value}" Style="{StaticResource Dex.Value}" TextWrapping="Wrap" MaxWidth="190" />
+                    </Grid>
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Tone}" Value="warn">
+                            <Setter TargetName="Value" Property="Foreground" Value="{DynamicResource Dex.Warning}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Tone}" Value="good">
+                            <Setter TargetName="Value" Property="Foreground" Value="{DynamicResource Dex.Good}" />
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </DataTemplate>
+
+    <!-- A two-column label/field row. Usage: <ContentControl Tag="Label" Content="{...field...}" /> is clumsy in WPF,
+         so each template lays out its own Grid with these column widths. -->
+    <GridLength x:Key="Dex.LabelColumn">110</GridLength>
+
+    <DataTemplate DataType="{x:Type vm:VertexEditor}">
+        <StackPanel>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="X" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding X, StringFormat=0.###}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Y" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding Y, StringFormat=0.###}" />
+            </Grid>
+            <TextBlock Style="{StaticResource Dex.Muted}" Text="Drag the corner on the plan, or press Delete to remove it (a shell needs at least 3 corners)." />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:EdgeEditor}">
+        <StackPanel>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Length" />
+                <TextBlock Grid.Column="1" Style="{StaticResource Dex.Value}" Text="{Binding Length}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Radius" />
+                <TextBlock Grid.Column="1" Style="{StaticResource Dex.Value}" Text="{Binding Radius}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Arc angle (°)" />
+                <TextBox Grid.Column="1" Text="{Binding ArcDegrees, StringFormat=0.#}" />
+            </Grid>
+            <Slider Minimum="-180" Maximum="180" Value="{Binding ArcDegrees}" TickFrequency="45" IsSnapToTickEnabled="False" Margin="0,2,0,8" />
+            <Button Content="Make straight" Command="{Binding StraightenCommand}" HorizontalAlignment="Left" />
+            <TextBlock Style="{StaticResource Dex.Muted}" Margin="0,8,0,0"
+                       Text="Drag the round handle to curve the wall. Double-click a wall to add a corner." />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:WallEditor}">
+        <StackPanel>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Start X/Y" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Margin="0,0,4,0" Text="{Binding StartX, StringFormat=0.###}" />
+                <TextBox Grid.Column="2" Text="{Binding StartY, StringFormat=0.###}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="End X/Y" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Margin="0,0,4,0" Text="{Binding EndX, StringFormat=0.###}" />
+                <TextBox Grid.Column="2" Text="{Binding EndY, StringFormat=0.###}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Thickness" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding Thickness, StringFormat=0.###}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Arc angle (°)" />
+                <TextBox Grid.Column="1" Text="{Binding ArcDegrees, StringFormat=0.#}" />
+            </Grid>
+            <Slider Minimum="-180" Maximum="180" Value="{Binding ArcDegrees}" Margin="0,2,0,8" />
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Length" />
+                <TextBlock Grid.Column="1" Style="{StaticResource Dex.Value}" Text="{Binding Length}" />
+            </Grid>
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:OpeningEditor}">
+        <StackPanel>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Type" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Kinds}" SelectedItem="{Binding Kind}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Position" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding Offset, StringFormat=0.###}" ToolTip="Distance along the wall from its start to the opening's center" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Width" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding Width, StringFormat=0.###}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Height" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding Height, StringFormat=0.###}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Sill height" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding SillHeight, StringFormat=0.###}" />
+            </Grid>
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:ConnectorEditor}">
+        <StackPanel>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Name" />
+                <TextBox Grid.Column="1" Text="{Binding Connector.Name}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Type" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Kinds}" SelectedItem="{Binding Connector.Kind}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Position" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding Offset, StringFormat=0.###}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Width" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding Width, StringFormat=0.###}" />
+            </Grid>
+            <TextBlock Style="{StaticResource Dex.Muted}"
+                       Text="Connectors snap together on the site plan. A personnel connector should sit over a door." />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:EquipmentEditor}">
+        <StackPanel>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Label" />
+                <TextBox Grid.Column="1" Text="{Binding Item.Label}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="X/Y" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Margin="0,0,4,0" Text="{Binding X, StringFormat=0.###}" />
+                <TextBox Grid.Column="2" Text="{Binding Y, StringFormat=0.###}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Rotation (°)" />
+                <TextBox Grid.Column="1" Text="{Binding Rotation, StringFormat=0.#}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Mount height" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding MountHeight, StringFormat=0.###}" />
+            </Grid>
+            <TextBlock Style="{StaticResource Dex.SectionHeader}" Text="Specification" />
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Size (W×D×H)" />
+                <TextBlock Grid.Column="1" Style="{StaticResource Dex.Value}" Text="{Binding Size}" TextWrapping="Wrap" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Mass" />
+                <TextBlock Grid.Column="1" Style="{StaticResource Dex.Value}" Text="{Binding Mass}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Power" />
+                <TextBlock Grid.Column="1" Style="{StaticResource Dex.Value}" Text="{Binding Power}" />
+            </Grid>
+            <TextBlock Style="{StaticResource Dex.Muted}" Text="{Binding Definition.Description}" Margin="0,4,0,0" />
+            <TextBlock Style="{StaticResource Dex.Muted}" Margin="0,8,0,0" Text="R rotates 90° (Ctrl+R 15°). Arrow keys nudge." />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:InstanceEditor}">
+        <StackPanel>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Tag" />
+                <TextBox Grid.Column="1" Text="{Binding Instance.Tag}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="X/Y" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Margin="0,0,4,0" Text="{Binding X, StringFormat=0.##}" />
+                <TextBox Grid.Column="2" Text="{Binding Y, StringFormat=0.##}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Rotation (°)" />
+                <TextBox Grid.Column="1" Text="{Binding Rotation, StringFormat=0.#}" />
+            </Grid>
+            <CheckBox Content="Override elevation above ground" IsChecked="{Binding OverrideElevation}" Margin="0,4,0,6" />
+            <Grid Style="{StaticResource Dex.FieldGrid}" IsEnabled="{Binding OverrideElevation}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Elevation" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding Elevation, StringFormat=0.##}" />
+            </Grid>
+            <TextBlock Style="{StaticResource Dex.Muted}" Margin="0,8,0,0"
+                       Text="Drag near another module's connector to snap and join them. Hold Alt to place freely. R rotates." />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:LinkEditor}">
+        <StackPanel>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Joins" />
+                <TextBlock Grid.Column="1" Style="{StaticResource Dex.Value}" Text="{Binding Between}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Length" />
+                <TextBlock Grid.Column="1" Style="{StaticResource Dex.Value}" Text="{Binding Length}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}" IsEnabled="{Binding IsCorridor}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}"><Run Text="Corridor width" /> (<Run Text="{Binding LengthUnit, Mode=OneWay}" />)</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding CorridorWidth, StringFormat=0.##}" />
+            </Grid>
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:UtilityRunEditor}">
+        <StackPanel>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Type" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Kinds}" SelectedItem="{Binding Run.Kind}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Label" />
+                <TextBox Grid.Column="1" Text="{Binding Run.Label}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Route" />
+                <TextBlock Grid.Column="1" Style="{StaticResource Dex.Value}" Text="{Binding Between}" />
+            </Grid>
+            <Grid Style="{StaticResource Dex.FieldGrid}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="{StaticResource Dex.LabelColumn}" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Dex.Label}" Text="Length" />
+                <TextBlock Grid.Column="1" Style="{StaticResource Dex.Value}" Text="{Binding Length}" />
+            </Grid>
+            <TextBlock Style="{StaticResource Dex.Label}" Text="Notes" Margin="0,4,0,4" />
+            <TextBox Text="{Binding Run.Notes}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="54" />
+            <Button Content="Straighten route" Command="{Binding ClearWaypointsCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" />
+            <TextBlock Style="{StaticResource Dex.Muted}" Margin="0,8,0,0" Text="Drag the round handles to re-route." />
+        </StackPanel>
+    </DataTemplate>
+</ResourceDictionary>

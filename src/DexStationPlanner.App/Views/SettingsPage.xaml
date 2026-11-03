@@ -1,0 +1,54 @@
+<UserControl x:Class="DexStationPlanner.App.Views.SettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:DexStationPlanner.App.ViewModels"
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance vm:MainViewModel}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32,24" MaxWidth="720" HorizontalAlignment="Left">
+            <TextBlock Style="{StaticResource Dex.PageTitle}" Text="Settings" />
+
+            <Border Style="{StaticResource Dex.Card}">
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Text="Appearance" />
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <TextBlock Text="Dark theme" VerticalAlignment="Center" Width="160" />
+                        <ToggleButton Style="{StaticResource Dex.Switch}" Width="40" Height="20" IsChecked="{Binding IsDarkTheme}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <TextBlock Text="Imperial units (this project)" VerticalAlignment="Center" Width="160" />
+                        <ToggleButton Style="{StaticResource Dex.Switch}" Width="40" Height="20" IsChecked="{Binding IsImperial}" />
+                    </StackPanel>
+                    <TextBlock Style="{StaticResource Dex.Muted}" Margin="0,10,0,0" FontSize="12"
+                               Text="Everything is stored in SI units; the unit switch only changes how values are shown and entered." />
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Dex.Card}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Text="Globe: Cesium ion (optional)" />
+                    <TextBlock Style="{StaticResource Dex.Muted}" Margin="0,6,0,10">
+                        The globe works without an account, using free satellite and street imagery on flat terrain.
+                        Paste a free Cesium ion access token to add 3D terrain (Cesium World Terrain) and Bing aerial imagery.
+                        The token is stored only on this computer, never in project files.
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource Dex.Label}" Text="Access token" Margin="0,0,0,4" />
+                    <TextBox Text="{Binding CesiumIonToken}" FontFamily="Consolas" />
+                    <TextBlock Margin="0,8,0,0">
+                        <Hyperlink NavigateUri="https://ion.cesium.com/tokens" RequestNavigate="Hyperlink_RequestNavigate">Get a token at ion.cesium.com</Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Dex.Card}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Text="About" />
+                    <TextBlock Style="{StaticResource Dex.Muted}" Margin="0,6,0,0" x:Name="VersionText" />
+                    <TextBlock Style="{StaticResource Dex.Muted}" Margin="0,6,0,0"
+                               Text="Licensed under the Apache License 2.0. Globe powered by CesiumJS (Apache 2.0). 3D preview by Helix Toolkit (MIT). Imagery © Esri and contributors, © OpenStreetMap contributors, Natural Earth." />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

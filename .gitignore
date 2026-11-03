@@ -1,0 +1,22 @@
+# Build output
+bin/
+obj/
+publish/
+artifacts/
+*.user
+*.suo
+.vs/
+.idea/
+*.DotSettings.user
+TestResults/
+
+# Globe web dependencies (restored by `npm ci` during build)
+node_modules/
+
+# OS / editor noise
+Thumbs.db
+.DS_Store
+*.swp
+
+# Atomic-save temp files
+*.dexstation.tmp

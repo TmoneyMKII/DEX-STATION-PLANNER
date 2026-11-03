@@ -1,0 +1,32 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- DEX palette, light. Keys must match Dark.xaml. -->
+    <Color x:Key="Dex.AccentColor">#D11010</Color>
+    <SolidColorBrush x:Key="Dex.Accent" Color="#D11010" />
+    <SolidColorBrush x:Key="Dex.AccentHover" Color="#E51414" />
+    <SolidColorBrush x:Key="Dex.AccentSubtle" Color="#22E51414" />
+    <SolidColorBrush x:Key="Dex.Background" Color="#F3F4F6" />
+    <SolidColorBrush x:Key="Dex.Surface" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Dex.SurfaceAlt" Color="#ECEEF1" />
+    <SolidColorBrush x:Key="Dex.Border" Color="#D3D7DC" />
+    <SolidColorBrush x:Key="Dex.Text" Color="#1B1E22" />
+    <SolidColorBrush x:Key="Dex.TextMuted" Color="#5F6670" />
+    <SolidColorBrush x:Key="Dex.Warning" Color="#B57A00" />
+    <SolidColorBrush x:Key="Dex.Good" Color="#1E8A55" />
+
+    <SolidColorBrush x:Key="Dex.Canvas.Background" Color="#FAFBFC" />
+    <SolidColorBrush x:Key="Dex.Canvas.GridMinor" Color="#EEF0F3" />
+    <SolidColorBrush x:Key="Dex.Canvas.GridMajor" Color="#D9DDE2" />
+    <SolidColorBrush x:Key="Dex.Canvas.Axis" Color="#AEB5BD" />
+    <SolidColorBrush x:Key="Dex.Canvas.ShellFill" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Dex.Canvas.Shell" Color="#2A2F35" />
+    <SolidColorBrush x:Key="Dex.Canvas.Wall" Color="#6B737C" />
+    <SolidColorBrush x:Key="Dex.Canvas.Text" Color="#2A2F35" />
+    <SolidColorBrush x:Key="Dex.Canvas.Dimension" Color="#1C6FB0" />
+    <SolidColorBrush x:Key="Dex.Canvas.Handle" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Dex.Canvas.Selection" Color="#D11010" />
+    <SolidColorBrush x:Key="Dex.Canvas.Preview" Color="#C27C00" />
+    <SolidColorBrush x:Key="Dex.Canvas.Door" Color="#1C6FB0" />
+    <SolidColorBrush x:Key="Dex.Canvas.Window" Color="#2A9DB8" />
+    <Color x:Key="Dex.Preview3D.Background">#EEF0F3</Color>
+</ResourceDictionary>

@@ -1,0 +1,65 @@
+[
+  { "id": "berth.single", "name": "Single Bunk", "category": "Berthing", "width": 0.95, "depth": 2.05, "height": 0.9, "massKg": 60, "powerDemandW": 10, "berths": 1, "color": "#4C7FA8", "description": "Single bed with under-bed storage and reading light." },
+  { "id": "berth.double-stack", "name": "Stacked Bunk (2)", "category": "Berthing", "width": 0.95, "depth": 2.05, "height": 1.8, "massKg": 110, "powerDemandW": 20, "berths": 2, "color": "#4C7FA8", "description": "Two-tier bunk with privacy curtains and reading lights." },
+  { "id": "berth.wardrobe", "name": "Wardrobe / Locker", "category": "Berthing", "width": 0.6, "depth": 0.6, "height": 2.0, "massKg": 45, "color": "#6A93B5", "description": "Personal clothing and gear locker." },
+  { "id": "berth.desk", "name": "Personal Desk", "category": "Berthing", "width": 1.0, "depth": 0.6, "height": 0.75, "massKg": 30, "powerDemandW": 60, "workstations": 1, "color": "#6A93B5", "description": "Small desk with task light and power outlets." },
+
+  { "id": "galley.range", "name": "Commercial Range", "category": "Galley", "width": 0.9, "depth": 0.8, "height": 0.9, "massKg": 180, "powerDemandW": 4500, "color": "#C27C3A", "description": "Electric 6-burner range with oven; average draw over a meal cycle." },
+  { "id": "galley.fridge", "name": "Reach-in Refrigerator", "category": "Galley", "width": 0.75, "depth": 0.8, "height": 2.0, "massKg": 140, "powerDemandW": 350, "color": "#C9955F", "description": "Commercial two-door refrigerator." },
+  { "id": "galley.freezer", "name": "Reach-in Freezer", "category": "Galley", "width": 0.75, "depth": 0.8, "height": 2.0, "massKg": 150, "powerDemandW": 600, "color": "#C9955F", "description": "Commercial two-door freezer." },
+  { "id": "galley.counter", "name": "Prep Counter + Sink", "category": "Galley", "width": 1.8, "depth": 0.7, "height": 0.9, "massKg": 90, "color": "#B9875A", "description": "Stainless prep counter with sink." },
+  { "id": "galley.dishwasher", "name": "Dishwasher", "category": "Galley", "width": 0.6, "depth": 0.65, "height": 0.85, "massKg": 70, "powerDemandW": 1200, "color": "#B9875A", "description": "Undercounter commercial dishwasher." },
+  { "id": "galley.table-6", "name": "Dining Table (6)", "category": "Galley", "width": 1.8, "depth": 0.9, "height": 0.75, "massKg": 55, "workstations": 6, "color": "#A6794F", "description": "Six-seat dining table with chairs." },
+
+  { "id": "hygiene.toilet", "name": "Toilet", "category": "Hygiene", "width": 0.45, "depth": 0.7, "height": 0.8, "massKg": 35, "powerDemandW": 5, "color": "#5FA3A0", "description": "Low-flow or incinerating toilet (incinerating units draw far more power)." },
+  { "id": "hygiene.shower", "name": "Shower Stall", "category": "Hygiene", "width": 0.9, "depth": 0.9, "height": 2.1, "massKg": 60, "color": "#5FA3A0", "description": "Enclosed shower stall." },
+  { "id": "hygiene.sink", "name": "Wash Basin", "category": "Hygiene", "width": 0.6, "depth": 0.45, "height": 0.85, "massKg": 20, "color": "#7DB8B5", "description": "Hand wash basin with vanity." },
+  { "id": "hygiene.washer", "name": "Washer / Dryer Stack", "category": "Hygiene", "width": 0.65, "depth": 0.7, "height": 1.8, "massKg": 140, "powerDemandW": 900, "color": "#7DB8B5", "description": "Stacked laundry washer and condensing dryer." },
+  { "id": "hygiene.water-heater", "name": "Water Heater", "category": "Hygiene", "shape": "Cylinder", "width": 0.6, "depth": 0.6, "height": 1.5, "massKg": 80, "powerDemandW": 1500, "color": "#4E8E8B", "description": "Electric storage water heater, 200 L." },
+
+  { "id": "lab.bench", "name": "Lab Bench", "category": "Laboratory", "width": 1.8, "depth": 0.75, "height": 0.9, "massKg": 120, "powerDemandW": 300, "workstations": 2, "color": "#8A6BBE", "description": "Chemical-resistant lab bench with shelving and outlets." },
+  { "id": "lab.fume-hood", "name": "Fume Hood", "category": "Laboratory", "width": 1.5, "depth": 0.85, "height": 2.4, "massKg": 300, "powerDemandW": 800, "color": "#9C80CB", "description": "Ducted chemical fume hood; requires make-up air." },
+  { "id": "lab.ult-freezer", "name": "-80 °C Freezer", "category": "Laboratory", "width": 0.85, "depth": 0.9, "height": 1.95, "massKg": 300, "powerDemandW": 700, "color": "#9C80CB", "description": "Upright ultra-low temperature sample freezer." },
+  { "id": "lab.instrument-rack", "name": "Instrument Rack (19\")", "category": "Laboratory", "width": 0.6, "depth": 1.0, "height": 2.0, "massKg": 250, "powerDemandW": 1500, "color": "#7457A8", "description": "42U rack for science instruments and data acquisition." },
+  { "id": "lab.glovebox", "name": "Glovebox", "category": "Laboratory", "width": 1.2, "depth": 0.8, "height": 1.9, "massKg": 350, "powerDemandW": 400, "color": "#7457A8", "description": "Inert-atmosphere glovebox." },
+  { "id": "lab.balance-table", "name": "Balance Table", "category": "Laboratory", "width": 0.9, "depth": 0.6, "height": 0.8, "massKg": 110, "powerDemandW": 50, "workstations": 1, "color": "#8A6BBE", "description": "Vibration-isolated table for precision balances." },
+
+  { "id": "med.exam-table", "name": "Exam Table", "category": "Medical", "width": 0.7, "depth": 1.9, "height": 0.8, "massKg": 90, "powerDemandW": 50, "color": "#D06A7A", "description": "Medical examination / treatment table." },
+  { "id": "med.cabinet", "name": "Medical Supply Cabinet", "category": "Medical", "width": 1.0, "depth": 0.5, "height": 2.0, "massKg": 80, "color": "#D88A96", "description": "Lockable medical supply cabinet." },
+
+  { "id": "office.desk", "name": "Workstation Desk", "category": "Office", "width": 1.6, "depth": 0.8, "height": 0.75, "massKg": 45, "powerDemandW": 150, "workstations": 1, "color": "#6F8A6F", "description": "Desk with computer and monitors." },
+  { "id": "office.table-8", "name": "Meeting Table (8)", "category": "Office", "width": 2.4, "depth": 1.1, "height": 0.75, "massKg": 80, "workstations": 8, "color": "#6F8A6F", "description": "Conference table seating eight." },
+
+  { "id": "power.genset-100", "name": "Diesel Generator 100 kW", "category": "Power", "width": 3.2, "depth": 1.2, "height": 1.8, "massKg": 2300, "powerSupplyW": 100000, "color": "#E0B23A", "description": "Prime-rated diesel genset (AN8 / JP-8 capable)." },
+  { "id": "power.genset-30", "name": "Diesel Generator 30 kW", "category": "Power", "width": 2.0, "depth": 0.9, "height": 1.3, "massKg": 900, "powerSupplyW": 30000, "color": "#E0B23A", "description": "Prime-rated diesel genset for small camps." },
+  { "id": "power.battery-rack", "name": "Battery Rack 50 kWh", "category": "Power", "width": 1.2, "depth": 0.6, "height": 2.0, "massKg": 600, "powerDemandW": 20, "color": "#D19E2A", "description": "LiFePO4 battery storage with BMS; keep above 0 °C." },
+  { "id": "power.inverter", "name": "Inverter / Charger", "category": "Power", "width": 0.8, "depth": 0.4, "height": 1.2, "massKg": 120, "powerDemandW": 150, "color": "#D19E2A", "description": "Hybrid inverter/charger, 30 kVA." },
+  { "id": "power.switchgear", "name": "Switchgear Panel", "category": "Power", "width": 1.6, "depth": 0.6, "height": 2.1, "massKg": 500, "powerDemandW": 50, "color": "#C08A1F", "description": "Main distribution and paralleling switchgear." },
+  { "id": "power.fuel-day-tank", "name": "Fuel Day Tank 1000 L", "category": "Power", "width": 1.8, "depth": 0.9, "height": 1.0, "massKg": 1050, "color": "#A8761A", "description": "Double-walled day tank (mass shown full)." },
+
+  { "id": "mech.boiler", "name": "Boiler / Furnace", "category": "Mechanical", "width": 1.0, "depth": 0.8, "height": 1.6, "massKg": 350, "powerDemandW": 400, "color": "#8C8C8C", "description": "Fuel-fired heating plant with circulation pumps." },
+  { "id": "mech.hrv", "name": "Heat Recovery Ventilator", "category": "Mechanical", "width": 1.2, "depth": 0.6, "height": 0.6, "massKg": 90, "powerDemandW": 300, "color": "#9C9C9C", "description": "Balanced ventilation with heat recovery." },
+  { "id": "mech.water-tank", "name": "Water Tank 2000 L", "category": "Mechanical", "shape": "Cylinder", "width": 1.4, "depth": 1.4, "height": 1.6, "massKg": 2100, "color": "#5E88A8", "description": "Potable water storage (mass shown full)." },
+  { "id": "mech.water-treatment", "name": "Water Treatment Skid", "category": "Mechanical", "width": 1.5, "depth": 0.8, "height": 1.8, "massKg": 400, "powerDemandW": 1200, "color": "#5E88A8", "description": "Filtration, UV and reverse-osmosis treatment." },
+  { "id": "mech.snow-melter", "name": "Snow Melter", "category": "Mechanical", "width": 2.0, "depth": 1.5, "height": 1.8, "massKg": 800, "powerDemandW": 2000, "color": "#7A9FBF", "description": "Snow/ice melter for water production (polar sites)." },
+  { "id": "mech.wastewater", "name": "Wastewater Treatment", "category": "Mechanical", "width": 2.0, "depth": 1.0, "height": 1.8, "massKg": 900, "powerDemandW": 1500, "color": "#6C7B5A", "description": "Packaged biological wastewater treatment unit." },
+
+  { "id": "comms.rack", "name": "Comms / IT Rack", "category": "Communications", "width": 0.6, "depth": 1.0, "height": 2.0, "massKg": 300, "powerDemandW": 2500, "color": "#3FA36B", "description": "Network, server and radio equipment rack." },
+  { "id": "comms.satcom", "name": "Satcom Terminal Indoor Unit", "category": "Communications", "width": 0.6, "depth": 0.6, "height": 0.9, "massKg": 60, "powerDemandW": 250, "color": "#55B47F", "description": "Indoor electronics for LEO/GEO satellite link." },
+  { "id": "comms.radio-desk", "name": "Radio Operator Desk", "category": "Communications", "width": 1.8, "depth": 0.8, "height": 0.75, "massKg": 80, "powerDemandW": 400, "workstations": 1, "color": "#3FA36B", "description": "HF/VHF/aviation radio position." },
+
+  { "id": "storage.shelving", "name": "Shelving Unit", "category": "Storage", "width": 1.2, "depth": 0.5, "height": 2.0, "massKg": 40, "color": "#7F7362", "description": "Steel shelving (mass shown empty)." },
+  { "id": "storage.pallet", "name": "Pallet Bay", "category": "Storage", "width": 1.2, "depth": 1.0, "height": 1.5, "massKg": 25, "color": "#968A77", "description": "Floor space for one standard pallet (mass shown empty)." },
+  { "id": "storage.flammables", "name": "Flammables Cabinet", "category": "Storage", "width": 1.1, "depth": 0.5, "height": 1.7, "massKg": 150, "color": "#B05A3A", "description": "Fire-rated cabinet for flammable liquids." },
+
+  { "id": "safety.extinguisher", "name": "Fire Extinguisher Station", "category": "Safety", "width": 0.3, "depth": 0.2, "height": 0.6, "massKg": 15, "color": "#E51414", "description": "Wall-mounted extinguisher." },
+  { "id": "safety.fire-panel", "name": "Fire Alarm Panel", "category": "Safety", "width": 0.6, "depth": 0.2, "height": 0.8, "massKg": 25, "powerDemandW": 50, "color": "#E51414", "description": "Addressable fire detection and alarm panel." },
+  { "id": "safety.emergency-cache", "name": "Emergency Survival Cache", "category": "Safety", "width": 1.2, "depth": 0.8, "height": 1.0, "massKg": 200, "color": "#F06A2A", "description": "Survival gear, food and fuel cache." },
+
+  { "id": "rec.lounge", "name": "Lounge Seating", "category": "Recreation", "width": 2.2, "depth": 0.9, "height": 0.85, "massKg": 70, "color": "#A35F8E", "description": "Sofa / lounge seating." },
+  { "id": "rec.gym", "name": "Exercise Station", "category": "Recreation", "width": 2.0, "depth": 1.0, "height": 1.5, "massKg": 150, "powerDemandW": 200, "color": "#A35F8E", "description": "Treadmill or multi-gym footprint." },
+
+  { "id": "shop.workbench", "name": "Workbench", "category": "Workshop", "width": 2.0, "depth": 0.8, "height": 0.9, "massKg": 120, "powerDemandW": 500, "workstations": 1, "color": "#8A7A52", "description": "Heavy-duty bench with vise and tool outlets." },
+  { "id": "shop.tool-chest", "name": "Tool Chest", "category": "Workshop", "width": 1.0, "depth": 0.5, "height": 1.0, "massKg": 180, "color": "#9A8A62", "description": "Rolling tool chest." },
+  { "id": "shop.welder", "name": "Welding Station", "category": "Workshop", "width": 1.2, "depth": 0.8, "height": 1.0, "massKg": 150, "powerDemandW": 3000, "color": "#9A8A62", "description": "Multi-process welder with fume extraction (intermittent load)." }
+]

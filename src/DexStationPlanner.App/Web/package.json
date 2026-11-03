@@ -1,0 +1,9 @@
+{
+  "name": "dex-station-planner-globe",
+  "private": true,
+  "description": "Web assets for the DEX Station Planner globe (CesiumJS hosted in WebView2).",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "cesium": "1.146.0"
+  }
+}

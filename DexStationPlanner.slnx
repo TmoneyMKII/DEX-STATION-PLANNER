@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DexStationPlanner.App/DexStationPlanner.App.csproj" />
+    <Project Path="src/DexStationPlanner.Core/DexStationPlanner.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DexStationPlanner.Core.Tests/DexStationPlanner.Core.Tests.csproj" />
+  </Folder>
+</Solution>

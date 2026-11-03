@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DEX Station Planner Globe</title>
+  <script>window.CESIUM_BASE_URL = "/cesium/";</script>
+  <script src="/cesium/Cesium.js"></script>
+  <link rel="stylesheet" href="/cesium/Widgets/widgets.css" />
+  <link rel="stylesheet" href="/globe.css" />
+</head>
+<body class="dark">
+  <div id="globe"></div>
+
+  <div id="toolbar" class="panel">
+    <label for="imagery">Imagery</label>
+    <select id="imagery">
+      <option value="satellite">Satellite (Esri)</option>
+      <option value="streets">Streets (OpenStreetMap)</option>
+      <option value="offline">Offline (Natural Earth)</option>
+    </select>
+    <span id="terrain-badge" class="badge" title="Terrain source"></span>
+  </div>
+
+  <div id="place-banner" class="panel banner hidden">
+    Click the globe to place <strong id="place-name">the station</strong>. Press <kbd>Esc</kbd> to cancel.
+  </div>
+
+  <div id="error" class="panel banner error hidden"></div>
+
+  <script src="/globe.js"></script>
+</body>
+</html>

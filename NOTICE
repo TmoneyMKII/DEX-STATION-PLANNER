@@ -1,0 +1,22 @@
+DEX Station Planner
+Copyright 2026 Diversified Exploration Works
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+The "DEX Works" name and logo are trademarks of Diversified Exploration Works
+and are not licensed for use beyond identifying this project (Apache-2.0 §6).
+
+This product includes or depends on the following third-party software:
+
+  CesiumJS                 Apache License 2.0         https://github.com/CesiumGS/cesium
+  Helix Toolkit (WPF)      MIT License                https://github.com/helix-toolkit/helix-toolkit
+  CommunityToolkit.Mvvm    MIT License                https://github.com/CommunityToolkit/dotnet
+  Microsoft.Web.WebView2   Microsoft WebView2 SDK license (BSD-style)
+                                                      https://www.nuget.org/packages/Microsoft.Web.WebView2
+
+Map data and imagery shown in the globe are provided by third parties under their own terms:
+
+  Natural Earth II imagery (bundled with CesiumJS)   Public domain   https://www.naturalearthdata.com
+  Esri World Imagery     © Esri, Maxar, Earthstar Geographics, and the GIS User Community
+  OpenStreetMap tiles    © OpenStreetMap contributors (ODbL); tile usage policy:
+                         https://operations.osmfoundation.org/policies/tiles/
+  Cesium ion (optional, user-supplied token)   https://cesium.com/legal/terms-of-service/

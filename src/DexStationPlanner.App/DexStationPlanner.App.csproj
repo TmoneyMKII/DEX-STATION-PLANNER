@@ -1,0 +1,63 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>DexStationPlanner.App</RootNamespace>
+    <AssemblyName>DexStationPlanner</AssemblyName>
+    <ApplicationIcon>Assets\dex.ico</ApplicationIcon>
+    <Product>DEX Station Planner</Product>
+    <Company>Diversified Exploration Works</Company>
+    <Copyright>Copyright © Diversified Exploration Works</Copyright>
+    <Version>0.1.0</Version>
+    <!-- WPF Fluent ThemeMode is marked experimental in .NET 9/10. -->
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DexStationPlanner.Core\DexStationPlanner.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="HelixToolkit.Wpf" Version="3.1.2" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\dex-logo.png" />
+    <Resource Include="Assets\dex.ico" />
+    <None Remove="Assets\dex-icon-256.png" />
+  </ItemGroup>
+
+  <!--
+    Globe web assets. Our own page lives in Web\*.html|js|css; CesiumJS comes from npm (Web\package.json,
+    pinned version) and is copied to wwwroot\cesium next to the executable.
+  -->
+  <ItemGroup>
+    <Content Include="Web\globe.html;Web\globe.js;Web\globe.css" Link="wwwroot\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="RestoreCesium" BeforeTargets="BeforeBuild" Condition="!Exists('$(MSBuildProjectDirectory)\Web\node_modules\cesium\Build\Cesium\Cesium.js')">
+    <Message Importance="high" Text="Installing CesiumJS (npm ci) for the globe view..." />
+    <Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="$(MSBuildProjectDirectory)\Web" />
+  </Target>
+
+  <Target Name="CopyCesium" AfterTargets="Build">
+    <ItemGroup>
+      <CesiumFiles Include="$(MSBuildProjectDirectory)\Web\node_modules\cesium\Build\Cesium\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(CesiumFiles)" DestinationFolder="$(OutDir)wwwroot\cesium\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="PublishCesium" AfterTargets="Publish">
+    <ItemGroup>
+      <CesiumPublishFiles Include="$(MSBuildProjectDirectory)\Web\node_modules\cesium\Build\Cesium\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(CesiumPublishFiles)" DestinationFolder="$(PublishDir)wwwroot\cesium\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
